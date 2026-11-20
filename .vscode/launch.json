@@ -1,0 +1,14 @@
+{
+  // Press F5: starts the preview, then opens the app in Chrome.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Open the app in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start preview"
+    }
+  ]
+}
