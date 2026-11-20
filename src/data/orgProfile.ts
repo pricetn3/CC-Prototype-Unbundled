@@ -127,7 +127,9 @@ export interface Schedule { on: boolean; freq: string; weekly: string; twice: st
 export interface OrgSettings {
   display: { name: string };
   ced: { on: boolean; purchase: string; auth: string; start: string; price: string; cedOnly: boolean; page2: boolean; legacy: boolean; domain: string; subdomain: string; contracts: string; internalEmail: string; logos: number; diplomas: number };
-  store: { on: boolean; first: string; additional: string; applies: string; certs: CertType[]; ld: boolean };
+  store: { on: boolean; first: string; additional: string; applies: string; certs: CertType[] };
+  /** Lost & Damaged: its own section since the design split it from paper ordering. */
+  ld: { on: boolean; report: boolean };
   reorder: { on: boolean; domain: string; subdomain: string; logos: number };
   hold: Schedule & { emails: string };
   batch: Schedule;
@@ -157,7 +159,8 @@ export function seedSettings(o: Org): OrgSettings {
     return {
       display: { name: o.displayName ?? '' },
       ced: { on: false, purchase: '', auth: '', start: '', price: '', cedOnly: false, page2: false, legacy: false, domain: '', subdomain: '', contracts: '', internalEmail: '', logos: 0, diplomas: 0 },
-      store: { on: false, first: '', additional: '', applies: 'certtype', certs: GR.map((t) => ({ type: t, desc: '', pkg: null })), ld: false },
+      store: { on: false, first: '', additional: '', applies: 'certtype', certs: GR.map((t) => ({ type: t, desc: '', pkg: null })) },
+      ld: { on: false, report: false },
       reorder: { on: o.setup.reorders, domain: '', subdomain: '', logos: 0 },
       hold,
       batch: { on: false, freq: '', weekly: '', twice: [], monthDay: '' },
@@ -170,7 +173,8 @@ export function seedSettings(o: Org): OrgSettings {
   return {
     display: { name: o.displayName ?? '' },
     ced: { on: true, purchase: 'student', auth: 'email', start: '2024-08-01', price: '14.95', cedOnly: false, page2: false, legacy: false, domain: dom, subdomain: 'credentials', contracts: '2024-07-15', internalEmail: '2024-07-22', logos: 2, diplomas: 3 },
-    store: { on: true, first: '45.00', additional: '25.00', applies: 'certtype', certs, ld: true },
+    store: { on: true, first: '45.00', additional: '25.00', applies: 'certtype', certs },
+    ld: { on: true, report: true },
     reorder: { on: o.setup.reorders, domain: dom, subdomain: 'reorder', logos: 1 },
     hold: o.setup.holds ? { ...hold, freq: hold.freq || 'weekly', weekly: hold.weekly || 'Tue' } : hold,
     batch: { on: true, freq: 'weekly', weekly: 'Tue', twice: ['Tue'], monthDay: '' },

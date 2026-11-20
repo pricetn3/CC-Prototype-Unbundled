@@ -49,3 +49,11 @@
 @media (max-width: 640px) {
   .shead { position: static; flex-wrap: wrap; }
 }
+
+/* Status badges and switches keep their own size at the right edge of the row. */
+.group :global(.cc-setting-row__control) > :global(.cc-badge),
+.group :global(.cc-setting-row__control) > :global(.cc-switch-label) { width: auto; align-self: flex-end; }
+@media (max-width: 640px) {
+  .group :global(.cc-setting-row__control) > :global(.cc-badge),
+  .group :global(.cc-setting-row__control) > :global(.cc-switch-label) { align-self: flex-start; }
+}

@@ -12,39 +12,130 @@
     "claudeDesign": "https://claude.ai/artifact/KLsdgKCsMehdiX4giBSJkZ"
   },
   "lastSync": {
-    "canvasVersion": "1795189931-0ac4",
+    "canvasVersion": "1795201833-b3c0",
     "date": "2026-11-20",
-    "designSystemCommit": "c1ddf73"
+    "designSystemCommit": "72b93e5"
   },
   "artboards": {
     "Internal-CC-Platform.dc.html": {
       "view": "internal",
       "screens": {
-        "shell": { "markup": "SIDEBAR, MAIN > TOP BAR", "code": ["src/layout/Sidebar.tsx", "src/layout/TopBar.tsx", "src/layout/AppShell.tsx"], "status": "built" },
-        "home": { "markup": "isHome", "code": ["src/pages/Home.tsx"], "status": "built" },
-        "orgs": { "markup": "isOrgs", "code": ["src/pages/Organizations.tsx"], "status": "built" },
-        "org": { "markup": "isOrgProfile (Details tab: isDetails)", "code": ["src/pages/OrgProfile.tsx"], "status": "details tab built; Shipping, Billing, Contacts, Punctuation Data, Settings tabs not built" },
-        "admin": { "markup": "isAdmin (adminVM)", "code": ["src/pages/Admin.tsx", "src/pages/AdminCountries.tsx", "src/pages/AdminActionLog.tsx"], "status": "built" },
-        "data": { "markup": "seed(), implSeedLog(), implCountriesSeed(), setupSummary()", "code": ["src/data/orgs.ts", "src/data/actionLog.ts", "src/data/countries.json"], "status": "ported" },
-        "addorg": { "markup": "isAddOrg", "status": "not built" },
-        "users": { "markup": "isUsersScreen", "status": "not built" },
-        "profile": { "markup": "isProfile", "status": "not built" },
-        "reports": { "markup": "isReports", "status": "not built" },
-        "orders": { "markup": "isOrders, isNewOrder", "status": "not built" },
-        "credentials": { "markup": "isCredentialsScreen", "status": "not built" },
-        "reorders": { "markup": "isReorders", "status": "not built" },
-        "holds": { "markup": "isHolds", "status": "not built" },
-        "signatures": { "markup": "isSignatures", "status": "not built" },
-        "docs": { "markup": "isDocs", "status": "not built" }
+        "shell": {
+          "markup": "SIDEBAR, MAIN > TOP BAR",
+          "code": [
+            "src/layout/Sidebar.tsx",
+            "src/layout/TopBar.tsx",
+            "src/layout/AppShell.tsx"
+          ],
+          "status": "built"
+        },
+        "home": {
+          "markup": "isHome",
+          "code": [
+            "src/pages/Home.tsx"
+          ],
+          "status": "built"
+        },
+        "orgs": {
+          "markup": "isOrgs",
+          "code": [
+            "src/pages/Organizations.tsx"
+          ],
+          "status": "built"
+        },
+        "org": {
+          "markup": "isOrgProfile (Details tab: isDetails)",
+          "code": [
+            "src/pages/OrgProfile.tsx"
+          ],
+          "status": "built (all tabs); Settings tab follows OrgSettingsV3"
+        },
+        "admin": {
+          "markup": "isAdmin (adminVM)",
+          "code": [
+            "src/pages/Admin.tsx",
+            "src/pages/AdminCountries.tsx",
+            "src/pages/AdminActionLog.tsx"
+          ],
+          "status": "built"
+        },
+        "data": {
+          "markup": "seed(), implSeedLog(), implCountriesSeed(), setupSummary()",
+          "code": [
+            "src/data/orgs.ts",
+            "src/data/actionLog.ts",
+            "src/data/countries.json"
+          ],
+          "status": "ported"
+        },
+        "addorg": {
+          "markup": "isAddOrg",
+          "status": "built"
+        },
+        "users": {
+          "markup": "isUsersScreen",
+          "status": "built"
+        },
+        "profile": {
+          "markup": "isProfile",
+          "status": "built"
+        },
+        "reports": {
+          "markup": "isReports",
+          "status": "built"
+        },
+        "orders": {
+          "markup": "isOrders, isNewOrder",
+          "status": "built"
+        },
+        "credentials": {
+          "markup": "isCredentialsScreen",
+          "status": "built"
+        },
+        "reorders": {
+          "markup": "isReorders",
+          "status": "built"
+        },
+        "holds": {
+          "markup": "isHolds",
+          "status": "built"
+        },
+        "signatures": {
+          "markup": "isSignatures",
+          "status": "built"
+        },
+        "docs": {
+          "markup": "isDocs",
+          "status": "built"
+        }
       }
     },
-    "CCTable.dc.html": { "code": ["src/components/CCTable.tsx"], "status": "built" },
-    "SegTabs.dc.html": { "code": ["src/components/SegTabs.tsx"], "status": "built" },
-    "CCField.dc.html": { "code": [], "status": "inputs use the design system's cc-field / cc-input classes directly" }
+    "CCTable.dc.html": {
+      "code": [
+        "src/components/CCTable.tsx"
+      ],
+      "status": "built"
+    },
+    "SegTabs.dc.html": {
+      "code": [
+        "src/components/SegTabs.tsx"
+      ],
+      "status": "built"
+    },
+    "CCField.dc.html": {
+      "code": [],
+      "status": "inputs use the design system's cc-field / cc-input classes directly"
+    },
+    "OrgSettingsV3.dc.html": {
+      "markup": "the Settings tab, embedded in the platform as Version 6 (v6)",
+      "code": [
+        "src/pages/org-profile/SettingsTab.tsx"
+      ],
+      "status": "built (v6)"
+    }
   },
   "notTracked": {
     "External-CC-Platform.dc.html": "Client view. Not built here yet; snapshot it when work on it starts.",
-    "OrgSettingsV3.dc.html": "Org profile › Settings tab. Not built here yet.",
     "Landing.dc.html, Support.dc.html": "Marketing site. Not part of this app.",
     "Internal-Org-Settings-Archive.dc.html": "Archived versions. Never synced."
   }

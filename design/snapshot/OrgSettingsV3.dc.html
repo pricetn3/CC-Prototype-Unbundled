@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Org settings v3</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/credential-connections-design-system-081ce699-1423-4ee3-8e65-465674c518bc/colors_and_type.css">
+<link rel="stylesheet" href="ds/credential-connections/tokens.css" data-cc-ds="tokens">
+<link rel="stylesheet" href="ds/credential-connections/components/bundle.css" data-cc-ds="components">
+<style>
+  body { margin: 0; }
+  .v2-nav a { text-decoration: none; }
+  /* !important: the inline background (transparent / selected gray-100) would otherwise win over hover */
+  .v2-nav a:not([aria-current="page"]):hover { background: var(--gray-50) !important; color: var(--gray-900) !important; }
+  .v2-nav a:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+  /* Cards layout: one card per section (design system card look), opens the section. */
+  /* Rows: same two columns as the profile's detail rows (232px label, then the value), top-aligned, so values sit next to their labels and a help line never shifts them. */
+  .v3s .cc-setting-row { display: grid; grid-template-columns: minmax(0, 232px) minmax(0, 1fr); align-items: start; column-gap: var(--space-6); padding: var(--space-4) var(--space-5); }
+  /* Labels and help text never move between view and Edit: they stay at the top of the row; fields line up with the top of the label. */
+  .v3s .cc-setting-row__text { padding-top: 0; }
+  .v3s .cc-setting-row__control .v3-slot.cc-setting-row__value { min-height: 0; padding: 0; }
+  .v3s .cc-setting-row__control { width: auto; max-width: 400px; min-width: 0; }
+  @media (max-width: 640px) { .v3s .cc-setting-row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2); } .v3s .cc-setting-row__text { padding-top: 0; } }
+  /* View and edit share the same 40px slot, so nothing jumps when you select Edit. */
+  .v3-slot { min-height: 40px; display: flex; align-items: center; box-sizing: border-box; }
+  .cc-setting-row__control .v3-slot.cc-setting-row__value { padding: 0 var(--space-3); }
+  .cc-setting-row__control--end .v3-slot { justify-content: flex-end; }
+  /* Variant 'linear' (Version 5): larger group titles above the boxes and roomier rows, like Linear's settings. */
+  .v5l .v3-group { margin-top: var(--space-10) !important; }
+  .v5l .v3-group:first-child { margin-top: var(--space-8) !important; }
+  .v5l .cc-setting-group__title { margin: 0 0 var(--space-3) var(--space-1); font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900); }
+  .v5l .cc-setting-row__help { margin-top: var(--space-0_5); }
+  .v3-file { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--gray-200); border-radius: var(--radius-xl); background: var(--bg-primary); max-width: 360px; }
+  .v3-file__icon { position: relative; flex-shrink: 0; width: 28px; height: 34px; display: inline-flex; }
+  /* Image uploads (logos, diplomas) show a small preview of the image in place of the generic file icon, so admins can confirm it is the right one. */
+  .v3-file__thumb { flex-shrink: 0; width: 48px; height: 48px; box-sizing: border-box; padding: var(--space-1); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--gray-200); border-radius: var(--radius-md); background: var(--gray-50); }
+  .v3-file__thumb img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+  .v3-file__tag { position: absolute; left: -4px; bottom: 6px; padding: 1px 3px; border-radius: 2px; background: var(--blue-700); color: #fff; font: var(--fw-bold) 9px/1 var(--font-body); letter-spacing: 0.02em; }
+  /* Long single-line values (display name, up to 256 characters): the field takes the free width beside a short label instead of scrolling inside 300px. */
+  .v6 .cc-setting-row.v6-wide .cc-setting-row__text { flex: 0 1 200px; }
+  .v6 .cc-setting-row.v6-wide .cc-setting-row__control { flex: 1 1 auto; width: auto; max-width: none; }
+  .v6 .cc-setting-row.v6-wide .cc-setting-row__control .cc-setting-row__value { text-align: left; }
+  @container orgset (max-width: 640px) { .v6 .cc-setting-row.v6-wide .cc-setting-row__text { flex: none; } }
+  .v6-count { font-variant-numeric: tabular-nums; }
+  .v6-sub { margin-left: var(--space-1); font-size: var(--text-sm-size); line-height: var(--text-sm-lh); color: var(--fg-secondary); } /* gray-600, 7:1 on white */
+  .v3s .cc-hint--error { color: var(--error-600) !important; } /* error messages are red text (4.6:1 on white) */
+  .v3-file__name { display: block; font: var(--fw-semibold) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-900); overflow-wrap: anywhere; } /* full name, wraps instead of truncating */
+  .v3-file__meta { display: block; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Version 6: Linear-style rows */
+  .v6 .cc-setting-row { display: flex !important; align-items: flex-start; /* labels stay at the top when a field grows (several emails, images) */ justify-content: space-between; gap: var(--space-8); padding: var(--space-4) var(--space-5); }
+  .v6 .cc-setting-row__text { flex: 1; min-width: 0; padding-top: 0; }
+  .v6 .cc-setting-row__control { flex-shrink: 0; width: 300px; max-width: 45%; align-items: flex-end; }
+  .v6 .cc-setting-row__control > * { width: 100%; }
+  .v6 .cc-setting-row__control .cc-setting-row__value { text-align: left; }
+  .v6 .cc-setting-row__control .cc-switch-label, .v6 .cc-setting-row__control .cc-badge { width: auto; }
+  .v6 .cc-setting-row__control [role="group"] { justify-content: flex-end; }
+  /* V6: short controls (switch, select, text, money, date) sit on the right; wide content (images, long text, checkbox lists) stacks under its label. */
+  .v6 .cc-setting-row.v6-stack { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+  .v6 .v6-stack .cc-setting-row__control { width: 100%; max-width: none; align-items: flex-start; }
+  .v6 .v6-stack .cc-setting-row__control > * { width: auto; }
+  .v6 .v6-stack .cc-setting-row__control .cc-setting-row__value { text-align: left; }
+  .v6 .v6-stack .cc-setting-row__control textarea { width: 100%; max-width: 640px; }
+  .v6 .v6-up-text { display: inline-block; margin-top: var(--space-3); }
+  .v6-opt { font-weight: var(--fw-regular); color: var(--fg-secondary); } /* gray-600, 7:1 on white */
+  .v6 .v6-radio-inline { flex-direction: row !important; flex-wrap: wrap; gap: var(--space-2) var(--space-6) !important; }
+  .v6 .cc-setting-row.v6-mid:has(.v6-radio-inline):has(.cc-hint--error) > .cc-setting-row__text:not(:has(.cc-setting-row__help)) { padding-top: 2px; } /* radios are 24px, not 40px, so the title only needs 2px to line up */
+  /* One rule for every settings row (same as the design system's Settings group): the control (or its view-mode value) sits centered against the title and help text, like the Status switch.
+     A control taller than the text (radio and checkbox lists, several emails) simply starts at the top, with the title beside its first line. An error or count sits right under its field. */
+  .v6 .cc-setting-row.v6-mid, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label), .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) { display: grid !important; grid-template-columns: minmax(0, 1fr) min(300px, 45%); column-gap: var(--space-8); align-items: start; }
+  .v6 .cc-setting-row.v6-mid > .cc-setting-row__control, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label) > .cc-setting-row__control, .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) > .cc-setting-row__control { align-self: center; width: auto; max-width: none; }
+  /* Rows that keep their own layout (stacked uploads and text areas, the wide Display name row) ignore the shared centering. */
+  .v3s .cc-setting-row > .cc-setting-row__control, .v6 .cc-setting-row > .cc-setting-row__control { align-self: auto; }
+  .v3s .cc-setting-row > .cc-setting-row__text, .v6 .cc-setting-row > .cc-setting-row__text { align-self: auto; }
+  .v6 .cc-setting-row:not(.v6-mid) > .cc-setting-row__text { padding-top: 0 !important; }
+  /* The title and help are centered too, so a title with no help sits level with the middle of its field. Two exceptions keep the text at the top:
+     lists (radio, checkbox, several emails), and a row showing an error, where a title with no help moves down 10px to line up with the field, not the field and its error together. */
+  .v6 .cc-setting-row.v6-mid > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label) > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) > .cc-setting-row__text { align-self: center; }
+  .v6 .cc-setting-row.v6-mid.v6-list > .cc-setting-row__text, .v6 .cc-setting-row.v6-mid:has(.cc-hint--error) > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label):has(.cc-hint--error) > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge):has(.cc-hint--error) > .cc-setting-row__text { align-self: start; }
+  .v6 .cc-setting-row.v6-mid:has(.cc-hint--error) > .cc-setting-row__text:not(:has(.cc-setting-row__help)), .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label):has(.cc-hint--error) > .cc-setting-row__text:not(:has(.cc-setting-row__help)), .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge):has(.cc-hint--error) > .cc-setting-row__text:not(:has(.cc-setting-row__help)) { padding-top: var(--space-2_5); }
+  @container orgset (max-width: 640px) { .v6 .cc-setting-row.v6-mid > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label) > .cc-setting-row__text, .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) > .cc-setting-row__text { align-self: stretch; padding-top: 0; } }
+  @container orgset (max-width: 640px) { .v6 .cc-setting-row.v6-mid, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label), .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) { display: flex !important; } .v6 .cc-setting-row.v6-mid > .cc-setting-row__control, .v6 .cc-setting-row:has(> .cc-setting-row__control > .cc-switch-label) > .cc-setting-row__control, .v6 .cc-setting-row:has(> .cc-setting-row__control > .v3-slot > .cc-badge) > .cc-setting-row__control { align-self: stretch; } }
+  .v6-fcount { margin-left: var(--space-1_5); vertical-align: 1px; font-variant-numeric: tabular-nums; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 var(--space-1); justify-content: center; } /* a circle for 1–9, a pill for 10+ (same idea as the tab counts) */
+  /* Locked upload: the button stays visible but disabled (aria-disabled keeps it focusable); the reason shows in a tooltip to its left, so it doesn't cover the files below, on hover and keyboard focus, Esc closes it. */
+  .v6 .v6-tipwrap { position: relative; }
+  .v6 .v6-tipwrap .v6-tip { display: none; position: absolute; z-index: var(--z-overlay); top: 50%; right: calc(100% + 8px); left: auto; transform: translateY(-50%); width: 240px; white-space: normal; padding: 6px 10px; border-radius: var(--radius-md); background: var(--gray-900); color: #fff; box-shadow: var(--shadow-lg); font: var(--fw-medium) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); text-align: left; }
+  .v6 .v6-tipwrap:hover .v6-tip, .v6 .v6-tipwrap:focus-within .v6-tip { display: block; }
+  .v6 .v6-tipwrap.is-off .v6-tip { display: none; }
+  @container orgset (max-width: 640px) { .v6 .v6-tipwrap .v6-tip { top: calc(100% + 6px); right: auto; left: 0; transform: none; max-width: calc(100vw - 64px); } }
+  .v6 .v6-tipwrap .cc-btn[aria-disabled="true"]:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+  /* Upload rows: the Upload button (or the locked note) sits on the right of the label, where a switch or field sits on other rows; the files stack below. */
+  .v6 .v6-uprow .cc-setting-row__text { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-6); align-items: center; }
+  .v6 .v6-uprow .cc-setting-row__text > * { grid-column: 1; }
+  .v6 .v6-uprow .cc-setting-row__text > .v6-up-text { grid-column: 2; grid-row: 1 / span 2; justify-self: end; margin-top: 0; }
+  @container orgset (max-width: 640px) { .v6 .v6-uprow .cc-setting-row__text { display: block; } .v6 .v6-uprow .cc-setting-row__text > .v6-up-text { margin-top: var(--space-3); } }
+  .v6 .v6-stack .v6-files { display: flex !important; flex-direction: column; gap: var(--space-2) !important; width: 100%; } /* one file per row: the full name always fits or wraps, never cut off */
+  .v6 .v6-stack .v3-file__thumb { width: 96px; height: 56px; } /* image preview sized for wide logos */
+  .v6 .v6-stack .v6-files .v6-up { grid-column: 1 / -1; }
+  .v6 .v6-stack .v3-file { max-width: none; }
+  .v6 .cc-setting-row__control .ccFW { max-width: none !important; }
+  .v6 .v6-stack .cc-setting-row__control [role="group"] { justify-content: flex-start; }
+  /* Day checkboxes: one vertical list, left-aligned with the dropdown above it (not right-aligned rows that wrap) */
+  .v6 .cc-setting-row__control .v6-checks { justify-content: flex-start !important; align-self: stretch; }
+  .v6 .v6-checks .cc-checkbox { min-height: 24px; }
+  /* Checkbox and radio labels: medium weight, like Untitled UI (CC Prototype only; not in the design system yet). Optional description line below. */
+  .cc-checkbox, .cc-radio { font-weight: var(--fw-medium) !important; color: var(--gray-700); }
+  .cc-checkbox__hint, .cc-radio__hint { display: block; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-600); }
+  /* V7: same rows as V6, but no card around each group (like the Details tab): rows sit on the page with light dividers. */
+  .v7 .cc-setting-group { border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .v7 .cc-setting-row { padding-left: 0 !important; padding-right: 0 !important; }
+  .v7 .cc-setting-group__title { margin-left: 0 !important; padding-bottom: var(--space-2); border-bottom: 1px solid var(--gray-200); margin-bottom: 0 !important; }
+  .v7 .cc-setting-row + .cc-setting-row { border-top: 1px solid var(--gray-100); }
+  /* Featured icon, Modern gray, md (DS spec): 40px, 8px radius, gray-300 border, skeuomorphic xs shadow, 20px gray-500 icon. */
+  .v6-ficon { margin-top: 3px; /* centered on a one-line subtitle */ box-sizing: border-box; width: 40px; height: 40px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-primary, #fff); border: 1px solid var(--gray-300); border-radius: 8px; color: var(--gray-500); box-shadow: 0 1px 2px rgba(10,13,18,0.05), inset 0 -2px 0 rgba(10,13,18,0.05); } /* Figma's inset 1px ring sits on top of its border; in CSS it would stack inside it and look 2px, so the 1px border alone carries the edge */
+  .v6-ficon svg { stroke-width: 1.67; }
+  /* Dropdown (ddVM): the platform's listbox dropdown (same look as the organization picker), used in place of native selects. */
+  .ccDd { position: relative; }
+  .ccDd-btn { width: 100%; display: flex !important; justify-content: space-between; gap: var(--space-2); }
+  .ccDd-btn:focus-visible, .ccDd-btn[aria-expanded="true"] { outline: none !important; box-shadow: var(--shadow-xs), 0 0 0 2px var(--blue-600) !important; }
+  .ccDd-btn[aria-invalid="true"]:not(:focus-visible):not([aria-expanded="true"]) { box-shadow: var(--shadow-xs), inset 0 0 0 1px var(--error-500) !important; }
+  .ccDd-btn[aria-expanded="true"] > svg { transform: rotate(180deg); }
+  .ccDd-v { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-900); }
+  .ccDd-v.is-ph { font-weight: var(--fw-regular); color: var(--gray-500); }
+  .ccDd-bd { position: fixed; inset: 0; z-index: 55; }
+  .ccDd-list { position: fixed; z-index: 60; max-height: 296px; overflow-y: auto; box-sizing: border-box; padding: var(--space-2); background: var(--bg-primary); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+  .ccDd-opt { display: flex; align-items: center; gap: var(--space-2_5); width: 100%; box-sizing: border-box; min-height: 40px; padding: var(--space-2) var(--space-2_5); border: none; border-radius: var(--radius-sm); background: transparent; cursor: pointer; text-align: left; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-900); }
+  .ccDd-opt:hover { background: var(--gray-100); }
+  .ccDd-opt:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+  .ccDd-opt > span:first-child { flex: 1; min-width: 0; }
+  /* V8: Linear-style. V6 rows (label and help text get the room on the left, control on the right), in a narrower column so the control stays close to its label. */
+  .v8 .cc-setting-row__control { width: 280px; }
+  /* V6 responsive: sizes follow the space the Settings tab actually has (container queries), not the whole window, so the app sidebar is accounted for. */
+  .v6 { container: orgset / inline-size; }
+  @container orgset (max-width: 900px) {
+    .v6 .v6-grid { grid-template-columns: minmax(0, 1fr) !important; row-gap: var(--space-5) !important; }
+    /* Side rail becomes a scrollable row of sections above the content. */
+    .v6 .v2-nav, .v6 :has(> .v2-nav) { position: static !important; }
+    .v6 .v2-nav { flex-direction: row !important; flex-wrap: nowrap; overflow-x: auto; gap: var(--space-1) !important; padding-bottom: var(--space-2); border-bottom: 1px solid var(--gray-200); scrollbar-width: thin; }
+    .v6 .v2-nav a { flex-shrink: 0; white-space: nowrap; }
+    .v6 .cc-setting-row__control { width: 260px; }
+  }
+  @container orgset (max-width: 640px) {
+    .v6 .v6-shead { flex-wrap: wrap; }
+    .v6 .v6-shead > div:last-child { width: 100%; justify-content: flex-start; }
+    .v6 .cc-setting-row, .v6 .cc-setting-row.v6-stack { flex-direction: column !important; align-items: stretch !important; gap: var(--space-2) !important; }
+    .v6 .cc-setting-row__control { width: 100% !important; max-width: none !important; align-items: flex-start !important; }
+    .v6 .cc-setting-row__control .cc-setting-row__value { text-align: left; }
+    .v6 .v6-stack .v6-files { grid-template-columns: minmax(0, 1fr) !important; }
+  }
+  /* V6/V7 sticky: the side rail and the section header (icon, title, Edit / Cancel / Save changes) stay in view while the fields scroll under them.
+     Both sit below the app's top bar, which is sticky too and 64px tall. */
+  @media (min-width: 641px) and (min-height: 601px) {
+    .v6 .v2-nav, .v6 :has(> .v2-nav) { position: sticky; top: calc(64px + var(--space-4)) !important; align-self: start; }
+    .v6 .v6-shead { position: sticky; top: 64px; z-index: 5; background: var(--bg-primary); padding-top: var(--space-4); margin-top: calc(-1 * var(--space-4)); }
+    /* Sticky only works if nothing between it and the page's scroll area clips with overflow:hidden. 'clip' looks the same but lets sticky through. */
+    [style*="overflow:hidden"]:has(.v6-shead), [style*="overflow: hidden"]:has(.v6-shead) { overflow: clip !important; }
+    [style*="overflow-x:hidden"]:has(.v6-shead), [style*="overflow-x: hidden"]:has(.v6-shead) { overflow-x: clip !important; }
+    [style*="overflow-y:hidden"]:has(.v6-shead), [style*="overflow-y: hidden"]:has(.v6-shead) { overflow-y: clip !important; }
+    /* While fields scroll under the sticky header, a soft shadow under its divider shows content is passing beneath. Bottom only, decorative. */
+    .v6 .v6-shead { transition: box-shadow 150ms cubic-bezier(0.2,0.6,0.2,1); }
+    .v6 .v6-shead[data-stuck] { box-shadow: 0 6px 8px -6px rgba(10, 13, 18, 0.12), 0 2px 3px -2px rgba(10, 13, 18, 0.06); }
+    @media (prefers-reduced-motion: reduce) { .v6 .v6-shead { transition: none; } }
+  /* WCAG 2.4.11: a focused field never ends up hidden behind the sticky header. */
+    .v6 :is(input, select, textarea, button, [role="switch"], a) { scroll-margin-top: 170px; scroll-margin-bottom: 24px; }
+  }
+  @media (max-width: 640px) { .v6 .cc-setting-row { flex-direction: column; align-items: stretch; gap: var(--space-2); } .v6 .cc-setting-row__control { width: 100%; max-width: none; align-items: flex-start; } .v6 .cc-setting-row__control .cc-setting-row__value { text-align: left; } }
+  .v4-card { display: flex; align-items: center; gap: var(--space-4); width: 100%; box-sizing: border-box; padding: var(--space-4) var(--space-5); border: 1px solid var(--gray-200); border-radius: var(--radius-xl); background: var(--bg-primary); box-shadow: var(--shadow-xs); text-align: left; cursor: pointer; font-family: var(--font-body); }
+  .v4-card:hover { background: var(--gray-50); }
+  .v4-card:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+  .v5-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--space-3); max-width: 900px; }
+  .v5-card { flex-direction: column; align-items: flex-start; gap: 0; height: 100%; padding: var(--space-5) !important; }
+  .v5-ind { width: 32px; height: 32px; flex-shrink: 0; box-sizing: border-box; border-radius: var(--radius-full); border: 1px solid; display: inline-flex; align-items: center; justify-content: center; }
+</style>
+</helmet>
+<div class="{{ rootCls }}" style="box-sizing: border-box; padding: {{ outerPad }}; font-family: var(--font-body); color: var(--gray-900);">
+  <div style="max-width: {{ maxW }}; margin: 0 auto;">
+    <sc-if value="{{ standalone }}" hint-placeholder-val="{{ true }}">
+
+    <nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: var(--space-2); font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-600);">
+      <span>Organizations</span><span aria-hidden="true">/</span><span style="color: var(--gray-900);">Organization Profile</span>
+    </nav>
+    <h1 style="margin: var(--space-4) 0 0; font: var(--fw-semibold) var(--text-display-xs-size)/var(--text-display-xs-lh) var(--font-body); color: var(--gray-900); letter-spacing: -0.01em;">{{ orgName }}</h1>
+    <p style="margin: var(--space-1) 0 0; font: var(--fw-regular) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--fg-secondary);">View and manage organization details.</p>
+
+    <div class="cc-tabs cc-tabs--brand" style="display: flex; width: fit-content; margin-top: var(--space-5);">
+      <sc-for list="{{ pageTabs }}" as="t" hint-placeholder-count="6">
+        <button type="button" class="cc-tabs__tab" aria-pressed="{{ t.pressed }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ showPageHead }}" hint-placeholder-val="{{ false }}">
+    <!-- Version 5: a "Settings" page heading like every other profile tab (h2, subtitle, divider); section titles become h3 under it. -->
+    <div style="padding-bottom: var(--space-4); border-bottom: 1px solid var(--gray-200);">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-6); flex-wrap: wrap;">
+        <h2 style="margin: 0; font: var(--fw-semibold) var(--text-lg-size)/var(--text-lg-lh) var(--font-body); color: var(--gray-900);">Settings</h2>
+        <p style="margin: 0; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: {{ sumFg }};">{{ summary }}</p>
+      </div>
+      <p style="margin: var(--space-0_5) 0 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary);">All changes are recorded in the Action log for reference.</p>
+    </div>
+    </sc-if>
+    <sc-if value="{{ showIntroRow }}" hint-placeholder-val="{{ true }}">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-6); flex-wrap: wrap; margin-top: {{ introMt }};">
+      <p style="margin: 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary);">All changes are recorded in the Action log for reference.</p>
+      <p style="margin: 0; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: {{ sumFg }};">{{ summary }}</p>
+    </div>
+    </sc-if>
+
+    <div class="v6-grid" style="display: grid; grid-template-columns: {{ gridCols }}; gap: var(--space-8); align-items: start; margin-top: {{ gridMt }}; column-gap: var(--space-6);">
+
+      <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+      <nav class="v2-nav" aria-label="Settings sections" style="position: sticky; top: 16px; display: flex; flex-direction: column; gap: 2px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+          <a href="#" onClick="{{ n.onOpen }}" aria-current="{{ n.cur }}" style="display: flex; align-items: center; gap: var(--space-2_5); min-height: 32px; box-sizing: border-box; padding: var(--space-1_5) var(--space-3); border-radius: var(--radius-md); background: {{ n.bg }}; font: {{ n.weight }} var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: {{ n.fg }};">
+            <span aria-hidden="true" style="width: {{ n.dotSz }}; height: {{ n.dotSz }}; margin: 0 {{ n.dotM }}; box-sizing: border-box; border-radius: {{ n.dotR }}; transform: {{ n.dotT }}; flex-shrink: 0; background: {{ n.dotBg }}; border: 1.5px solid {{ n.dotBd }};"></span>
+            <span style="flex: 1; min-width: 0;">{{ n.label }}<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">, {{ n.stLabel }}</span></span>
+          </a>
+        </sc-for>
+      </nav>
+      </sc-if>
+
+      <sc-if value="{{ showCards }}" hint-placeholder-val="{{ false }}">
+        <div>
+        <!-- Same page-heading pattern as the Details, Shipping and Contacts tabs: h2, subtitle, divider underneath -->
+        <div style="padding-bottom: var(--space-4); border-bottom: 1px solid var(--gray-200); margin-bottom: var(--space-4);">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-6); flex-wrap: wrap;">
+            <h2 style="margin: 0; font: var(--fw-semibold) var(--text-lg-size)/var(--text-lg-lh) var(--font-body); color: var(--gray-900);">Overview</h2>
+            <p style="margin: 0; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: {{ sumFg }};">{{ summary }}</p>
+          </div>
+          <p style="margin: var(--space-0_5) 0 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary);">All changes are recorded in the Action log for reference.</p>
+        </div>
+        <!-- Two-column cards; status shows as a badge with its word, so it's never colour alone (WCAG 1.4.1). -->
+        <ul role="list" aria-label="Settings sections" class="v5-grid">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="6">
+            <li style="display: flex;"><button type="button" class="v4-card v5-card {{ c.cardCls }}" onClick="{{ c.onOpen }}">
+              <span style="display: flex; align-items: center; gap: var(--space-3); width: 100%;">
+                <span style="flex: 1; min-width: 0; font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900);">{{ c.label }}</span>
+                <span class="cc-badge {{ c.badgeCls }}">{{ c.stLabel }}</span>
+              </span>
+              <span style="display: block; width: 100%; margin-top: var(--space-3); font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-600);">{{ c.sum }}</span>
+              <span style="display: flex; align-items: center; gap: var(--space-1); margin-top: auto; padding-top: var(--space-4); font: var(--fw-semibold) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--blue-700);">{{ c.cta }}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+            </button></li>
+          </sc-for>
+        </ul>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ true }}">
+      <section aria-labelledby="v2-title" style="min-width: 0;">
+        <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="cc-link" onClick="{{ onBack }}" style="display: inline-flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-6); padding: 0; border: none; background: none; cursor: pointer; font: var(--fw-semibold) var(--text-sm-size)/var(--text-sm-lh) var(--font-body);"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m0 0 7 7m-7-7 7-7"></path></svg>All settings</button>
+        </sc-if>
+        <!-- Same page heading as the Details tab ("Organization details"): h2 18/28 semibold, subtitle, divider underneath. -->
+        <div class="v6-shead" style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--gray-200);">
+          <div style="min-width: 0; display: flex; align-items: flex-start; gap: var(--space-4);"> <!-- top-aligned so the icon stays put when Edit's buttons make the subtitle wrap -->
+          <!-- V6/V7: white featured icon (decorative; the heading names the section). -->
+          <sc-if value="{{ showSecIcon }}" hint-placeholder-val="{{ false }}"><span class="v6-ficon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><sc-if value="{{ ic.batch }}" hint-placeholder-val="{{ false }}"><path d="m2 12.0001 9.6422 4.8211c.1312.0656.1968.0984.2656.1113a.5.5 0 0 0 .1844 0c.0688-.0129.1344-.0457.2656-.1113L22 12.0001m-20 5 9.6422 4.8211c.1312.0656.1968.0984.2656.1113a.5.5 0 0 0 .1844 0c.0688-.0129.1344-.0457.2656-.1113L22 17.0001m-20-10 9.6422-4.8211c.1312-.0656.1968-.0984.2656-.1113a.5.5 0 0 1 .1844 0c.0688.0129.1344.0457.2656.1113L22 7l-9.6422 4.8212c-.1312.0656-.1968.0984-.2656.1113a.5.5 0 0 1-.1844 0c-.0688-.0129-.1344-.0457-.2656-.1113z"></path></sc-if><sc-if value="{{ ic.ced }}" hint-placeholder-val="{{ false }}"><path d="M8 21h8m-4-4v4m-5.2-4h10.4c1.6802 0 2.5202 0 3.162-.327a3 3 0 0 0 1.311-1.311C22 14.7202 22 13.8802 22 12.2V7.8c0-1.6802 0-2.5202-.327-3.162a3 3 0 0 0-1.311-1.311C19.7202 3 18.8802 3 17.2 3H6.8c-1.6802 0-2.5202 0-3.162.327a3 3 0 0 0-1.311 1.311C2 5.2798 2 6.1198 2 7.8v4.4c0 1.6802 0 2.5202.327 3.162a3 3 0 0 0 1.311 1.311C4.2798 17 5.1198 17 6.8 17"></path></sc-if><sc-if value="{{ ic.hold }}" hint-placeholder-val="{{ false }}"><path d="M9.5 15V9m5 6V9m7.5 3c0 5.5228-4.4772 10-10 10S2 17.5228 2 12 6.4772 2 12 2s10 4.4772 10 10"></path></sc-if><sc-if value="{{ ic.ld }}" hint-placeholder-val="{{ false }}"><path d="M14 2.27V6.4c0 .56 0 .84.109 1.054a1 1 0 0 0 .437.437C14.76 8 15.04 8 15.6 8h4.13M9.5 12.5l5 5m0-5-5 5M14 2H8.8c-1.68 0-2.52 0-3.162.327a3 3 0 0 0-1.311 1.311C4 4.28 4 5.12 4 6.8v10.4c0 1.68 0 2.52.327 3.162a3 3 0 0 0 1.311 1.311C6.28 22 7.12 22 8.8 22h6.4c1.68 0 2.52 0 3.162-.327a3 3 0 0 0 1.311-1.311C20 19.72 20 18.88 20 17.2V8l-6-6Z"></path></sc-if><sc-if value="{{ ic.display }}" hint-placeholder-val="{{ false }}"><path d="M20 10V6.8c0-1.6802 0-2.5202-.327-3.162a3 3 0 0 0-1.311-1.311C17.7202 2 16.8802 2 15.2 2H8.8c-1.6802 0-2.5202 0-3.162.327a3 3 0 0 0-1.311 1.311C4 4.2798 4 5.1198 4 6.8v10.4c0 1.6802 0 2.5202.327 3.162a3 3 0 0 0 1.311 1.311C6.2798 22 7.1198 22 8.8 22h1.7M13 11H8m3 4H8m8-8H8m11.25 10v-1.75c0-.9665-.7835-1.75-1.75-1.75s-1.75.7835-1.75 1.75V17m-.15 4h3.8c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C21 20.2401 21 19.9601 21 19.4v-.8c0-.5601 0-.8401-.109-1.054a1 1 0 0 0-.437-.437C20.2401 17 19.9601 17 19.4 17h-3.8c-.5601 0-.8401 0-1.054.109a1 1 0 0 0-.437.437C14 17.7599 14 18.0399 14 18.6v.8c0 .5601 0 .8401.109 1.054a1 1 0 0 0 .437.437c.2139.109.4939.109 1.054.109"></path></sc-if><sc-if value="{{ ic.reorder }}" hint-placeholder-val="{{ false }}"><path d="M22 10s-2.005-2.7318-3.6338-4.3618S14.4864 3 12 3c-4.9706 0-9 4.0294-9 9s4.0294 9 9 9c4.1031 0 7.5649-2.7457 8.6482-6.5M22 10V4m0 6h-6"></path></sc-if><sc-if value="{{ ic.store }}" hint-placeholder-val="{{ false }}"><path d="M5.52 2.64 3.96 4.72c-.309.412-.4635.618-.4599.7904a.5.5 0 0 0 .1916.3833C3.8276 6 4.085 6 4.6 6h14.8c.515 0 .7725 0 .9083-.1063a.5.5 0 0 0 .1916-.3833c.0036-.1724-.1509-.3784-.4599-.7904l-1.56-2.08m-12.96 0c.176-.2347.264-.352.3755-.4366a1 1 0 0 1 .3299-.165C6.36 2 6.5067 2 6.8 2h10.4c.2933 0 .44 0 .5746.0385.1192.034.2311.09.3299.1649.1115.0846.1995.202.3755.4366m-12.96 0L3.64 5.1467c-.2375.3166-.3562.4749-.4405.6492a2 2 0 0 0-.1623.487C3 6.473 3 6.671 3 7.0668V18.8c0 1.1201 0 1.6802.218 2.108.1917.3763.4977.6823.874.874C4.5198 22 5.08 22 6.2 22h11.6c1.1201 0 1.6802 0 2.108-.218a2 2 0 0 0 .874-.874C21 20.4802 21 19.9201 21 18.8V7.0667c0-.3958 0-.5937-.0372-.7837a2 2 0 0 0-.1623-.487c-.0843-.1744-.203-.3327-.4405-.6493L18.48 2.64M16 10a4 4 0 0 1-1.1716 2.8284 3.9996 3.9996 0 0 1-5.6568 0A4 4 0 0 1 8 10"></path></sc-if></svg></span></sc-if>
+          <div style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: var(--space-2_5); flex-wrap: wrap;">
+              <sc-if value="{{ secH2 }}" hint-placeholder-val="{{ true }}"><h2 id="v2-title" style="margin: 0; font: var(--fw-semibold) var(--text-lg-size)/var(--text-lg-lh) var(--font-body); color: var(--gray-900);">{{ sec.label }}</h2></sc-if>
+              <sc-if value="{{ secH3 }}" hint-placeholder-val="{{ false }}"><h3 id="v2-title" style="margin: 0; font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900);">{{ sec.label }}</h3></sc-if>
+              <sc-if value="{{ sec.showBadge }}" hint-placeholder-val="{{ true }}"><span class="cc-badge {{ sec.badgeCls }}">{{ sec.stLabel }}</span></sc-if>
+              <sc-if value="{{ sec.showSwitch }}" hint-placeholder-val="{{ false }}"><span class="cc-switch-label"><button type="button" role="switch" class="cc-switch" aria-checked="{{ sec.checked }}" aria-label="{{ sec.label }}" aria-describedby="v2-sw-help" onClick="{{ sec.onToggle }}"></button><span aria-hidden="true">{{ sec.swText }}</span></span></sc-if>
+            </div>
+            <p style="margin: var(--space-0_5) 0 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary);">{{ sec.desc }}</p>
+            <sc-if value="{{ sec.showSwitch }}" hint-placeholder-val="{{ false }}"><p id="v2-sw-help" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">{{ sec.swHelp }}</p></sc-if>
+          </div>
+          </div>
+          <div style="display: flex; gap: var(--space-3); flex-shrink: 0;">
+            <sc-if value="{{ viewing }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}"><button type="button" class="cc-btn cc-btn--primary" onClick="{{ onEdit }}">Edit</button></sc-if><!-- no Edit while CeD/CeC only keeps the section off: there is nothing to change here -->
+            </sc-if>
+            <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+              <button type="button" class="cc-btn cc-btn--secondary" onClick="{{ onCancel }}">Cancel</button>
+              <button type="button" class="cc-btn cc-btn--primary" onClick="{{ onSave }}">Save changes</button>
+            </sc-if>
+          </div>
+        </div>
+
+        <div role="status" aria-live="polite">
+          <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: var(--space-4) 0 0; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--success-700);">Changes saved.</p>
+          </sc-if>
+          <sc-if value="{{ hasErrors }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: var(--space-4) 0 0; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--error-700);">Fix the highlighted fields to save.</p>
+          </sc-if>
+        </div>
+
+        <!-- Content keeps the same 900px reading width as the Details and Punctuation Data tabs; the heading and divider above stay full width. -->
+        <div style="max-width: {{ contentMax }};">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+          <div class="v3-group" style="margin-top: var(--space-6);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-4); flex-wrap: wrap;">
+            <sc-if value="{{ secH2 }}" hint-placeholder-val="{{ true }}"><h3 class="cc-setting-group__title">{{ g.title }}</h3></sc-if>
+            <sc-if value="{{ secH3 }}" hint-placeholder-val="{{ false }}"><h4 class="cc-setting-group__title">{{ g.title }}</h4></sc-if>
+            <sc-if value="{{ g.hasSite }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary); overflow-wrap: anywhere;">Site address: {{ g.siteAddr }}</p></sc-if>
+            </div>
+            <div class="cc-setting-group {{ g.mutedCls }}">
+              <sc-if value="{{ g.isCerts }}" hint-placeholder-val="{{ false }}">
+                <!-- Same tools as Version 1: search, filter by packaging and, while editing, set packaging for every shown cert type at once. -->
+                <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--gray-200);">
+                  <div><label for="v3-cq" class="cc-label" style="display: block; margin-bottom: var(--space-1_5);">Search</label>
+                    <div class="ccFW cc-input" style="display: flex; align-items: center; gap: var(--space-2); width: 220px;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round"><path d="m21 21-4.35-4.35M19 11c0 4.4183-3.5817 8-8 8s-8-3.5817-8-8 3.5817-8 8-8 8 3.5817 8 8"></path></svg><input id="v3-cq" class="ccNB" value="{{ cq.q }}" onInput="{{ cq.onQ }}" placeholder="Cert type or description" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent;"></div></div>
+                  <div><label for="v3-cf" class="cc-label" style="display: block; margin-bottom: var(--space-1_5);">Show</label>
+                    <div class="ccDd" onKeyDown="{{ cq.fDd.onKey }}" style="width: 200px;"><button type="button" id="{{ cq.fDd.btnId }}" onClick="{{ cq.fDd.onToggle }}" aria-haspopup="listbox" aria-expanded="{{ cq.fDd.exp }}" aria-controls="{{ cq.fDd.listId }}" aria-label="{{ cq.fDd.aria }}" aria-invalid="{{ cq.fDd.invalid }}" class="cc-btn cc-btn--secondary ccDd-btn"><span class="ccDd-v {{ cq.fDd.phCls }}">{{ cq.fDd.text }}</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{ cq.fDd.open }}" hint-placeholder-val="{{ false }}"><div class="ccDd-bd" onClick="{{ cq.fDd.onClose }}"></div><div id="{{ cq.fDd.listId }}" role="listbox" aria-label="{{ cq.fDd.label }}" class="ccDd-list" style="top:{{ cq.fDd.top }}px; left:{{ cq.fDd.left }}px; width:{{ cq.fDd.w }}px;"><sc-for list="{{ cq.fDd.options }}" as="ddo" hint-placeholder-count="3"><button type="button" id="{{ ddo.id }}" role="option" aria-selected="{{ ddo.selAttr }}" onClick="{{ ddo.onClick }}" class="ccDd-opt"><span>{{ ddo.label }}</span><sc-if value="{{ ddo.isSel }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if></button></sc-for></div></sc-if></div></div>
+                  <sc-if value="{{ cq.hasNeed }}" hint-placeholder-val="{{ false }}"><p style="margin: 0 0 0 auto; align-self: flex-end; min-height: 40px; display: inline-flex; align-items: center; gap: var(--space-1_5); font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--warning-700);"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 9999px; background: var(--warning-500);"></span>{{ cq.needText }}</p></sc-if>
+                </div>
+                <!-- 11316 AC 2.3 / 3.3: select rows, then set packaging or one description for all of them. -->
+                <sc-if value="{{ cq.hasSel }}" hint-placeholder-val="{{ false }}">
+                  <div role="group" aria-label="Edit selected cert types" style="padding: var(--space-3) var(--space-5); background: var(--gray-50); border-bottom: 1px solid var(--gray-200);">
+                  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);">
+                    <span role="status" style="font: var(--fw-semibold) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-900); margin-right: var(--space-1);">{{ cq.selText }}</span>
+                      <div class="ccDd" onKeyDown="{{ cq.bulkDd.onKey }}" style="width: 200px;"><button type="button" id="{{ cq.bulkDd.btnId }}" onClick="{{ cq.bulkDd.onToggle }}" aria-haspopup="listbox" aria-expanded="{{ cq.bulkDd.exp }}" aria-controls="{{ cq.bulkDd.listId }}" aria-label="{{ cq.bulkDd.aria }}" aria-invalid="{{ cq.bulkDd.invalid }}" class="cc-btn cc-btn--secondary ccDd-btn"><span class="ccDd-v {{ cq.bulkDd.phCls }}">{{ cq.bulkDd.text }}</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{ cq.bulkDd.open }}" hint-placeholder-val="{{ false }}"><div class="ccDd-bd" onClick="{{ cq.bulkDd.onClose }}"></div><div id="{{ cq.bulkDd.listId }}" role="listbox" aria-label="{{ cq.bulkDd.label }}" class="ccDd-list" style="top:{{ cq.bulkDd.top }}px; left:{{ cq.bulkDd.left }}px; width:{{ cq.bulkDd.w }}px;"><sc-for list="{{ cq.bulkDd.options }}" as="ddo" hint-placeholder-count="3"><button type="button" id="{{ ddo.id }}" role="option" aria-selected="{{ ddo.selAttr }}" onClick="{{ ddo.onClick }}" class="ccDd-opt"><span>{{ ddo.label }}</span><sc-if value="{{ ddo.isSel }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if></button></sc-for></div></sc-if></div>
+                    <button type="button" class="cc-btn cc-btn--secondary" onClick="{{ cq.onDescOpen }}" aria-expanded="{{ cq.descExp }}">Use same description</button>
+                    <button type="button" class="cc-btn cc-btn--tertiary" onClick="{{ cq.onClearSel }}" style="margin-left: auto;">Clear selection</button>
+                  </div>
+                  <sc-if value="{{ cq.descOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top: var(--space-3); max-width: 560px;">
+                      <label for="v3-bd" class="cc-label" style="display: block; margin-bottom: var(--space-1_5);">Description for {{ cq.selText2 }}</label>
+                      <textarea id="v3-bd" class="cc-input v3-grow" rows="1" value="{{ cq.bd }}" onInput="{{ cq.onBd }}" style="height: auto; min-height: 40px; padding: var(--space-2) var(--space-3); resize: none; overflow: hidden; field-sizing: content;"></textarea>
+                      <sc-if value="{{ cq.bdHasCount }}" hint-placeholder-val="{{ false }}"><span class="cc-hint {{ cq.bdCountCls }}">{{ cq.bdCount }}</span></sc-if>
+                      <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);"><button type="button" class="cc-btn cc-btn--tertiary cc-btn--sm" onClick="{{ cq.onDescCancel }}">Cancel</button><button type="button" class="cc-btn cc-btn--secondary cc-btn--sm" onClick="{{ cq.onDescApply }}" disabled="{{ cq.bdOff }}">Apply to {{ cq.selText2 }}</button></div>
+                    </div>
+                  </sc-if>
+                  </div>
+                </sc-if>
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body);">
+                    <thead><tr>
+                      <th scope="col" style="text-align: left; padding: var(--space-2_5) var(--space-5); font: var(--fw-medium) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600); border-bottom: 1px solid var(--gray-200); width: 30%;"><sc-if value="{{ cq.viewing }}" hint-placeholder-val="{{ true }}">Cert type</sc-if><sc-if value="{{ cq.editing }}" hint-placeholder-val="{{ false }}"><label class="cc-checkbox" for="v3-call" style="font: inherit; color: inherit;"><input id="v3-call" class="cc-checkbox__input" type="checkbox" checked="{{ cq.allSel }}" onChange="{{ cq.onAll }}" aria-label="Select all {{ cq.shownN }} shown cert types">Cert type</label></sc-if></th>
+                      <th scope="col" style="text-align: left; padding: var(--space-2_5) var(--space-3); font: var(--fw-medium) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600); border-bottom: 1px solid var(--gray-200);">Description</th>
+                      <th scope="col" style="text-align: left; padding: var(--space-2_5) var(--space-5) var(--space-2_5) var(--space-3); font: var(--fw-medium) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600); border-bottom: 1px solid var(--gray-200); width: 220px;">Packaging</th>
+                    </tr></thead>
+                    <tbody>
+                      <sc-for list="{{ g.certRows }}" as="c" hint-placeholder-count="3">
+                        <tr style="border-top: 1px solid var(--gray-200); vertical-align: top;">
+                          <td style="padding: var(--space-3) var(--space-5); font-weight: var(--fw-medium); color: var(--gray-900); overflow-wrap: anywhere;"><sc-if value="{{ c.viewing }}" hint-placeholder-val="{{ true }}"><span>{{ c.type }}</span></sc-if><sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}"><label class="cc-checkbox" for="{{ c.selId }}" style="font: inherit; color: inherit; align-items: flex-start;"><input id="{{ c.selId }}" class="cc-checkbox__input" type="checkbox" checked="{{ c.sel }}" onChange="{{ c.onSel }}" aria-label="{{ c.selAria }}">{{ c.type }}</label></sc-if><sc-if value="{{ c.missing }}" hint-placeholder-val="{{ false }}"><span style="display: block; margin-top: var(--space-1_5);"><span class="cc-badge cc-badge--warning"><span class="cc-badge__dot" aria-hidden="true"></span>{{ c.missText }}</span></span></sc-if></td>
+                          <td style="padding: var(--space-3);">
+                            <sc-if value="{{ c.viewing }}" hint-placeholder-val="{{ true }}"><span style="color: var(--gray-700);">{{ c.descView }}</span></sc-if>
+                            <sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}"><textarea id="{{ c.descId }}" class="cc-input v3-grow" rows="1" value="{{ c.desc }}" onInput="{{ c.onDesc }}" aria-label="Description for {{ c.type }}" aria-invalid="{{ c.descInv }}" aria-describedby="{{ c.descBy }}" style="height: auto; min-height: 40px; padding: var(--space-2) var(--space-3); resize: none; overflow: hidden; field-sizing: content;"></textarea><sc-if value="{{ c.hasDescErr }}" hint-placeholder-val="{{ false }}"><span id="{{ c.descErrId }}" class="cc-hint cc-hint--error">{{ c.descErr }}</span></sc-if><sc-if value="{{ c.dHasCount }}" hint-placeholder-val="{{ false }}"><span class="cc-hint {{ c.dCountCls }}" aria-hidden="true">{{ c.dCount }}</span><span role="status" aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">{{ c.dCountSr }}</span></sc-if></sc-if>
+                          </td>
+                          <td style="padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3);">
+                            <sc-if value="{{ c.viewing }}" hint-placeholder-val="{{ true }}"><span style="color: var(--gray-700);">{{ c.pkgView }}</span><sc-if value="{{ c.hasSize }}" hint-placeholder-val="{{ false }}"><span style="margin-left: var(--space-1_5); white-space: nowrap; font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600);">{{ c.pkgSize }}</span></sc-if></sc-if>
+                            <sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}"><div class="ccDd" onKeyDown="{{ c.dd.onKey }}" style="width: 100%; min-width: 200px;"><button type="button" id="{{ c.dd.btnId }}" onClick="{{ c.dd.onToggle }}" aria-haspopup="listbox" aria-expanded="{{ c.dd.exp }}" aria-controls="{{ c.dd.listId }}" aria-label="{{ c.dd.aria }}" aria-invalid="{{ c.dd.invalid }}" class="cc-btn cc-btn--secondary ccDd-btn"><span class="ccDd-v {{ c.dd.phCls }}">{{ c.dd.text }}</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{ c.dd.open }}" hint-placeholder-val="{{ false }}"><div class="ccDd-bd" onClick="{{ c.dd.onClose }}"></div><div id="{{ c.dd.listId }}" role="listbox" aria-label="{{ c.dd.label }}" class="ccDd-list" style="top:{{ c.dd.top }}px; left:{{ c.dd.left }}px; width:{{ c.dd.w }}px;"><sc-for list="{{ c.dd.options }}" as="ddo" hint-placeholder-count="3"><button type="button" id="{{ ddo.id }}" role="option" aria-selected="{{ ddo.selAttr }}" onClick="{{ ddo.onClick }}" class="ccDd-opt"><span>{{ ddo.label }}</span><sc-if value="{{ ddo.isSel }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if></button></sc-for></div></sc-if></div><sc-if value="{{ c.hasPkgErr }}" hint-placeholder-val="{{ false }}"><span class="cc-hint cc-hint--error">{{ c.pkgErr }}</span></sc-if></sc-if>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="padding: var(--space-2_5) var(--space-5); border-top: 1px solid var(--gray-200); background: var(--gray-50); border-radius: 0 0 var(--radius-xl) var(--radius-xl); font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600);">{{ cq.shownText }}</div>
+              </sc-if>
+              <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="2">
+                <div class="cc-setting-row {{ r.rowCls }}">
+                  <div class="cc-setting-row__text">
+                    <label class="cc-setting-row__label" id="{{ r.id }}-lbl" for="{{ r.id }}">{{ r.label }}<sc-if value="{{ r.optShow }}" hint-placeholder-val="{{ false }}"><span class="v6-opt"> (optional)</span></sc-if><sc-if value="{{ r.fcShow }}" hint-placeholder-val="{{ false }}"><span class="cc-badge v6-fcount" aria-hidden="true">{{ r.fcNum }}</span><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">, {{ r.fcSr }}</span></sc-if></label>
+                    <sc-if value="{{ r.hasHelp }}" hint-placeholder-val="{{ true }}"><p class="cc-setting-row__help" id="{{ r.helpId }}">{{ r.help }}</p></sc-if>
+                    <sc-if value="{{ r.upText }}" hint-placeholder-val="{{ false }}"><span class="v6-up-text"><label for="{{ r.id }}" class="cc-btn cc-btn--secondary cc-btn--sm" style="cursor: pointer;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v1.2c0 1.68 0 2.52-.327 3.162a3 3 0 0 1-1.311 1.311C18.72 21 17.88 21 16.2 21H7.8c-1.68 0-2.52 0-3.162-.327a3 3 0 0 1-1.311-1.311C3 18.72 3 17.88 3 16.2V15m14-7-5-5m0 0L7 8m5-5v12"></path></svg>{{ r.uploadLabel }}</label><input id="{{ r.id }}" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onChange="{{ r.onFile }}" aria-describedby="{{ r.descBy }}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;"></span></sc-if>
+                    <sc-if value="{{ r.upLock }}" hint-placeholder-val="{{ false }}"><span class="v6-up-text cc-tooltip-wrap v6-tipwrap {{ r.tipCls }}"><button type="button" class="cc-btn cc-btn--secondary cc-btn--sm" aria-disabled="true" aria-describedby="{{ r.id }}-tip" onKeyDown="{{ r.onTipKey }}" onBlur="{{ r.onTipBlur }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v1.2c0 1.68 0 2.52-.327 3.162a3 3 0 0 1-1.311 1.311C18.72 21 17.88 21 16.2 21H7.8c-1.68 0-2.52 0-3.162-.327a3 3 0 0 1-1.311-1.311C3 18.72 3 17.88 3 16.2V15m14-7-5-5m0 0L7 8m5-5v12"></path></svg>{{ r.uploadLabel }}</button><span class="cc-tooltip v6-tip" role="tooltip" id="{{ r.id }}-tip">{{ r.upLockText }}</span></span></sc-if>
+                  </div>
+                  <div class="cc-setting-row__control {{ r.ctlCls }}">
+                    <sc-if value="{{ r.isTextView }}" hint-placeholder-val="{{ false }}"><p class="cc-setting-row__value v3-slot" id="{{ r.id }}">{{ r.dMain }}<sc-if value="{{ r.hasDSub }}" hint-placeholder-val="{{ false }}"><span class="v6-sub"> {{ r.dSub }}</span></sc-if><sc-if value="{{ r.isLocked }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-left: var(--space-1_5);"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg><span style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">{{ r.lockSr }}</span></sc-if></p></sc-if>
+                    <sc-if value="{{ r.isEmailView }}" hint-placeholder-val="{{ false }}"><div class="v3-slot" id="{{ r.id }}" style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: var(--space-1);"><sc-for list="{{ r.emailLinks }}" as="el" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; gap: var(--space-2);"><a href="{{ el.href }}" class="cc-link" style="font-size: var(--text-smed-size); line-height: var(--text-smed-lh); overflow-wrap: anywhere;">{{ el.addr }}</a><button type="button" class="cc-icon-btn" onClick="{{ el.onCopy }}" title="{{ el.copyTitle }}" aria-label="{{ el.copyLabel }}" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0;"><sc-if value="{{ el.copied }}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{ el.notCopied }}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></sc-if></button></span></sc-for><span role="status" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">{{ r.emailCopiedMsg }}</span></div></sc-if>
+                    <sc-if value="{{ r.isBadgeView }}" hint-placeholder-val="{{ false }}"><span class="v3-slot"><span id="{{ r.id }}" class="cc-badge {{ r.badgeCls }}"><span class="cc-badge__dot" aria-hidden="true"></span>{{ r.display }}</span></span></sc-if>
+                    <sc-if value="{{ r.isSwitch }}" hint-placeholder-val="{{ false }}">
+                      <span class="cc-switch-label v3-slot">
+                        <span aria-hidden="true">{{ r.swText }}</span>
+                        <button type="button" id="{{ r.id }}" role="switch" class="cc-switch" aria-checked="{{ r.checked }}" aria-readonly="{{ r.roAttr }}" aria-describedby="{{ r.helpId }}" onClick="{{ r.onToggle }}"></button>
+                      </span>
+                    </sc-if>
+                    <sc-if value="{{ r.isText }}" hint-placeholder-val="{{ true }}">
+                      <input id="{{ r.id }}" class="cc-input" type="{{ r.inType }}" value="{{ r.value }}" placeholder="{{ r.ph }}" onInput="{{ r.onInput }}" aria-invalid="{{ r.invalid }}" aria-describedby="{{ r.descBy }}">
+                    </sc-if>
+                    <sc-if value="{{ r.isDate }}" hint-placeholder-val="{{ false }}">
+                      <!-- Design system date field: type MM/DD/YYYY or pick from the calendar (same as Admin > Action log). -->
+                      <div class="cc-date-field" onKeyDown="{{ r.onCalKey }}">
+                        <span id="{{ r.dHintId }}" class="cc-sr-only" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">Format MM/DD/YYYY.</span>
+                        <input id="{{ r.id }}" class="cc-input" type="text" inputmode="numeric" autocomplete="off" value="{{ r.dVal }}" placeholder="MM/DD/YYYY" onInput="{{ r.onDInput }}" onBlur="{{ r.onDBlur }}" onKeyDown="{{ r.onDKey }}" onClick="{{ r.onDClick }}" aria-invalid="{{ r.invalid }}" aria-describedby="{{ r.dHintId }} {{ r.descBy }}">
+                        <button type="button" id="{{ r.dBtnId }}" class="cc-icon-btn cc-date-field__btn" aria-label="{{ r.dBtnAria }}" aria-haspopup="dialog" aria-expanded="{{ r.dExp }}" onClick="{{ r.onDBtn }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10H3m13-8v4M8 2v4m-.2 16h8.4c1.68 0 2.52 0 3.162-.327a3 3 0 0 0 1.311-1.311C21 19.72 21 18.88 21 17.2V8.8c0-1.68 0-2.52-.327-3.162a3 3 0 0 0-1.311-1.311C18.72 4 17.88 4 16.2 4H7.8c-1.68 0-2.52 0-3.162.327a3 3 0 0 0-1.311 1.311C3 6.28 3 7.12 3 8.8v8.4c0 1.68 0 2.52.327 3.162a3 3 0 0 0 1.311 1.311C5.28 22 6.12 22 7.8 22Z"></path></svg></button>
+                        <sc-if value="{{ r.dOpen }}" hint-placeholder-val="{{ false }}">
+                          <div class="cc-date-field__popover cc-calendar" role="dialog" aria-label="{{ r.cal.title }}">
+                            <sc-if value="{{ r.cal.viewDays }}" hint-placeholder-val="{{ true }}">
+                              <div class="cc-calendar__header">
+                                <button type="button" class="cc-calendar__heading" onClick="{{ r.cal.onMonths }}">{{ r.cal.monthLabel }}<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color: var(--gray-500);"><path d="m6 9 6 6 6-6"></path></svg></button>
+                                <button type="button" class="cc-calendar__heading" onClick="{{ r.cal.onYears }}">{{ r.cal.yearLabel }}<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color: var(--gray-500);"><path d="m6 9 6 6 6-6"></path></svg></button>
+                                <span style="flex: 1;"></span>
+                                <button type="button" class="cc-icon-btn cc-icon-btn--xs" aria-label="Previous month" onClick="{{ r.cal.onPrev }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                                <button type="button" class="cc-icon-btn cc-icon-btn--xs" aria-label="Next month" onClick="{{ r.cal.onNext }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+                              </div>
+                              <div class="cc-calendar__grid"><sc-for list="{{ r.cal.weekdays }}" as="w" hint-placeholder-count="7"><div class="cc-calendar__weekday">{{ w.l }}</div></sc-for></div>
+                              <div class="cc-calendar__grid"><sc-for list="{{ r.cal.days }}" as="c" hint-placeholder-count="42"><div class="cc-calendar__cell"><button type="button" class="cc-calendar__day" onClick="{{ c.onClick }}" aria-label="{{ c.aria }}" aria-pressed="{{ c.pressed }}" data-outside="{{ c.outside }}" data-today="{{ c.today }}">{{ c.label }}</button></div></sc-for></div>
+                            </sc-if>
+                            <sc-if value="{{ r.cal.viewMonths }}" hint-placeholder-val="{{ false }}">
+                              <div class="cc-calendar__header"><button type="button" class="cc-icon-btn cc-icon-btn--xs" aria-label="Back" onClick="{{ r.cal.onBack }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"></path></svg></button><span class="cc-calendar__label">Select month</span></div>
+                              <div class="cc-calendar__options"><sc-for list="{{ r.cal.months }}" as="m" hint-placeholder-count="12"><button type="button" class="cc-calendar__option" aria-pressed="{{ m.pressed }}" onClick="{{ m.onClick }}">{{ m.label }}</button></sc-for></div>
+                            </sc-if>
+                            <sc-if value="{{ r.cal.viewYears }}" hint-placeholder-val="{{ false }}">
+                              <div class="cc-calendar__header"><button type="button" class="cc-icon-btn cc-icon-btn--xs" aria-label="Back" onClick="{{ r.cal.onBack }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"></path></svg></button><span class="cc-calendar__label">Select year</span></div>
+                              <div class="cc-calendar__options cc-calendar__options--scroll"><sc-for list="{{ r.cal.years }}" as="y" hint-placeholder-count="18"><button type="button" class="cc-calendar__option" aria-pressed="{{ y.pressed }}" onClick="{{ y.onClick }}">{{ y.label }}</button></sc-for></div>
+                            </sc-if>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.isMoney }}" hint-placeholder-val="{{ false }}">
+                      <div class="ccFW cc-input" style="display: flex; align-items: center; padding: 0; max-width: 200px;"><span aria-hidden="true" style="padding-left: var(--space-3); font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-500);">$</span><input id="{{ r.id }}" type="text" inputmode="decimal" autocomplete="off" value="{{ r.value }}" placeholder="{{ r.ph }}" onInput="{{ r.onMoneyInput }}" onBlur="{{ r.onMoneyBlur }}" aria-invalid="{{ r.invalid }}" aria-describedby="{{ r.descBy }}" style="flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent; padding: 0 var(--space-3) 0 var(--space-1);"></div>
+                    </sc-if>
+                    <sc-if value="{{ r.isEmails }}" hint-placeholder-val="{{ false }}">
+                      <!-- One email per field; Add email adds another (max 10). -->
+                      <div style="display: flex; flex-direction: column; gap: var(--space-2); width: 100%;">
+                        <sc-for list="{{ r.emailItems }}" as="em" hint-placeholder-count="1">
+                          <div style="display: flex; align-items: center; gap: var(--space-2);">
+                            <input id="{{ em.id }}" type="email" autocomplete="email" class="cc-input" value="{{ em.value }}" placeholder="{{ r.ph }}" onInput="{{ em.onInput }}" aria-label="{{ em.aria }}" aria-invalid="{{ em.bad }}" aria-describedby="{{ r.descBy }}" style="flex: 1; min-width: 0;">
+                            <sc-if value="{{ em.canRemove }}" hint-placeholder-val="{{ false }}"><button type="button" class="cc-icon-btn cc-icon-btn--sm" aria-label="{{ em.rmLabel }}" onClick="{{ em.onRemove }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></sc-if>
+                          </div>
+                        </sc-for>
+                        <!-- The error sits right under the email fields, above Add email, so it stays with the field it describes. -->
+                        <sc-if value="{{ r.errInline }}" hint-placeholder-val="{{ false }}"><span id="{{ r.errId }}" class="cc-hint cc-hint--error" style="margin-top: 0;">{{ r.error }}</span></sc-if>
+                        <sc-if value="{{ r.canAddEmail }}" hint-placeholder-val="{{ true }}"><span><button type="button" class="cc-btn cc-btn--secondary cc-btn--sm" onClick="{{ r.onAddEmail }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14m-7-7h14"></path></svg>Add email</button></span></sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.isArea }}" hint-placeholder-val="{{ false }}">
+                      <textarea id="{{ r.id }}" class="cc-input" rows="3" value="{{ r.value }}" placeholder="{{ r.ph }}" onInput="{{ r.onInput }}" aria-invalid="{{ r.invalid }}" aria-describedby="{{ r.descBy }}" style="height: auto; padding: var(--space-2_5) var(--space-3); resize: vertical;"></textarea>
+                    </sc-if>
+                    <sc-if value="{{ r.isSelect }}" hint-placeholder-val="{{ false }}">
+                      <div class="ccDd" onKeyDown="{{ r.dd.onKey }}" style="width: 100%;"><button type="button" id="{{ r.dd.btnId }}" onClick="{{ r.dd.onToggle }}" aria-haspopup="listbox" aria-expanded="{{ r.dd.exp }}" aria-controls="{{ r.dd.listId }}" aria-label="{{ r.dd.aria }}" aria-invalid="{{ r.dd.invalid }}" aria-describedby="{{ r.descBy }}" class="cc-btn cc-btn--secondary ccDd-btn"><span class="ccDd-v {{ r.dd.phCls }}">{{ r.dd.text }}</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{ r.dd.open }}" hint-placeholder-val="{{ false }}"><div class="ccDd-bd" onClick="{{ r.dd.onClose }}"></div><div id="{{ r.dd.listId }}" role="listbox" aria-label="{{ r.dd.label }}" class="ccDd-list" style="top:{{ r.dd.top }}px; left:{{ r.dd.left }}px; width:{{ r.dd.w }}px;"><sc-for list="{{ r.dd.options }}" as="ddo" hint-placeholder-count="3"><button type="button" id="{{ ddo.id }}" role="option" aria-selected="{{ ddo.selAttr }}" onClick="{{ ddo.onClick }}" class="ccDd-opt"><span>{{ ddo.label }}</span><sc-if value="{{ ddo.isSel }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if></button></sc-for></div></sc-if></div>
+                    </sc-if>
+                    <sc-if value="{{ r.isRadio }}" hint-placeholder-val="{{ false }}">
+                      <div role="radiogroup" class="{{ r.radioCls }}" aria-labelledby="{{ r.id }}-lbl" aria-describedby="{{ r.descBy }}" style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        <sc-for list="{{ r.options }}" as="o" hint-placeholder-count="2">
+                          <label class="cc-radio" for="{{ o.id }}" style="align-items: flex-start;"><input id="{{ o.id }}" class="cc-radio__input" type="radio" name="{{ o.name }}" checked="{{ o.checked }}" onChange="{{ o.onPick }}"><span><span style="display: block;">{{ o.label }}</span><sc-if value="{{ o.hasDesc }}" hint-placeholder-val="{{ false }}"><span style="display: block; font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--fg-secondary);">{{ o.desc }}</span></sc-if></span></label>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.isCheck }}" hint-placeholder-val="{{ false }}">
+                      <span style="display: flex;"><label class="cc-checkbox" for="{{ r.id }}"><input id="{{ r.id }}" class="cc-checkbox__input" type="checkbox" checked="{{ r.checked }}" onChange="{{ r.onCheck }}" aria-describedby="{{ r.descBy }}">{{ r.checkLabel }}</label></span>
+                    </sc-if>
+                    <sc-if value="{{ r.isChecks }}" hint-placeholder-val="{{ false }}">
+                      <div role="group" aria-labelledby="{{ r.id }}-lbl" aria-describedby="{{ r.descBy }}" class="v6-checks" style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);">
+                        <sc-for list="{{ r.options }}" as="o" hint-placeholder-count="5"><label class="cc-checkbox" for="{{ o.id }}"><input id="{{ o.id }}" class="cc-checkbox__input" type="checkbox" checked="{{ o.checked }}" disabled="{{ o.dis }}" onChange="{{ o.onToggle }}">{{ o.label }}</label></sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.isFiles }}" hint-placeholder-val="{{ false }}">
+                      <!-- Uploaded images use the platform's file card (same as Documents and the order Signatures/Files tabs): type icon, file name, upload date. -->
+                      <div class="v6-files" style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        <sc-for list="{{ r.files }}" as="fl" hint-placeholder-count="1">
+                          <div class="v3-file">
+                            <sc-if value="{{ fl.hasThumb }}" hint-placeholder-val="{{ false }}"><span class="v3-file__thumb"><img src="{{ fl.src }}" alt=""></span></sc-if><sc-if value="{{ fl.noThumb }}" hint-placeholder-val="{{ true }}"><span class="v3-file__icon" aria-hidden="true"><svg width="28" height="34" viewBox="0 0 28 34" fill="none"><path d="M4 1h14l9 9v20a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V4a3 3 0 0 1 3-3Z" fill="var(--bg-primary)" stroke="var(--gray-300)" stroke-width="1.5"></path><path d="M18 1v6a3 3 0 0 0 3 3h6" stroke="var(--gray-300)" stroke-width="1.5"></path></svg><span class="v3-file__tag">{{ fl.ext }}</span></span></sc-if>
+                            <span style="flex: 1; min-width: 0;"><span class="v3-file__name" title="{{ fl.name }}"><span aria-hidden="true">{{ fl.short }}</span><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">{{ fl.name }}</span></span><span class="v3-file__meta">{{ fl.meta }}</span></span>
+                            <sc-if value="{{ r.filesEdit }}" hint-placeholder-val="{{ false }}"><button type="button" class="cc-icon-btn cc-icon-btn--xs" aria-label="Remove {{ fl.name }}" onClick="{{ fl.onRemove }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></sc-if>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ r.noFiles }}" hint-placeholder-val="{{ false }}"><p class="cc-setting-row__value v6-up" style="color: var(--fg-secondary);">None uploaded</p></sc-if>
+                        <sc-if value="{{ r.upCtl }}" hint-placeholder-val="{{ false }}">
+                          <span class="v6-up"><label for="{{ r.id }}" class="cc-btn cc-btn--secondary cc-btn--sm" style="cursor: pointer;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v1.2c0 1.68 0 2.52-.327 3.162a3 3 0 0 1-1.311 1.311C18.72 21 17.88 21 16.2 21H7.8c-1.68 0-2.52 0-3.162-.327a3 3 0 0 1-1.311-1.311C3 18.72 3 17.88 3 16.2V15m14-7-5-5m0 0L7 8m5-5v12"></path></svg>{{ r.uploadLabel }}</label><input id="{{ r.id }}" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" onChange="{{ r.onFile }}" aria-describedby="{{ r.descBy }}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;"></span>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ r.errBelow }}" hint-placeholder-val="{{ false }}"><span id="{{ r.errId }}" class="cc-hint cc-hint--error">{{ r.error }}</span></sc-if>
+                    <sc-if value="{{ r.hasCount }}" hint-placeholder-val="{{ false }}"><span class="cc-hint v6-count {{ r.countCls }}" aria-hidden="true">{{ r.countText }}</span><span role="status" aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;">{{ r.countSr }}</span></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        </div>
+      </section>
+      </sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ leaveOpen }}" hint-placeholder-val="{{ false }}">
+    <!-- Platform Unsaved changes dialog (DS recipe: icon left, Cancel / Discard changes / Save changes). -->
+    <div class="cc-dialog-overlay" style="position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop, rgba(12,17,29,0.5));">
+      <div class="cc-dialog" role="alertdialog" aria-modal="true" aria-labelledby="v4-leave-t" aria-describedby="v4-leave-m" style="position: relative; padding: var(--space-5) var(--space-6) var(--space-6);">
+        <div style="display: flex; gap: var(--space-4); padding-right: var(--space-8);">
+          <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: var(--radius-full); background: var(--warning-50); color: var(--warning-700); display: inline-flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v3.4c0 .56 0 .84.109 1.054.0959.1882.2489.3411.437.437C7.76 8 8.04 8 8.6 8h6.8c.5601 0 .8401 0 1.054-.109a1 1 0 0 0 .437-.437C17 7.24 17 6.96 17 6.4V4m0 17v-6.4c0-.5601 0-.8401-.109-1.054a1 1 0 0 0-.437-.437C16.2401 13 15.9601 13 15.4 13H8.6c-.56 0-.84 0-1.054.109a1 1 0 0 0-.437.437C7 13.7599 7 14.0399 7 14.6V21M21 9.3255V16.2c0 1.6802 0 2.5202-.327 3.162a3 3 0 0 1-1.311 1.311C18.7202 21 17.8802 21 16.2 21H7.8c-1.6802 0-2.5202 0-3.162-.327a3 3 0 0 1-1.311-1.311C3 18.7202 3 17.8802 3 16.2V7.8c0-1.6802 0-2.5202.327-3.162a3 3 0 0 1 1.311-1.311C5.2798 3 6.1198 3 7.8 3h6.8745c.4892 0 .7338 0 .964.0553.204.049.3991.1298.5781.2394.2018.1237.3748.2966.7207.6426l3.1254 3.1254c.3459.346.5189.5189.6426.7207.1096.179.1904.374.2394.5781.0553.2302.0553.4748.0553.964"></path></svg></span>
+          <div><h2 id="v4-leave-t" style="margin: 0; font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900);">Unsaved changes</h2><p id="v4-leave-m" style="margin: 0; font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary);">Are you sure you want to leave this page? All changes will be lost.</p></div>
+        </div>
+        <button type="button" class="cc-icon-btn" aria-label="Close" onClick="{{ onStay }}" style="position: absolute; top: var(--space-4); right: var(--space-4);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        <div class="cc-dialog__actions"><button type="button" class="cc-btn cc-btn--tertiary" onClick="{{ onStay }}">Cancel</button><button type="button" class="cc-btn cc-btn--secondary" onClick="{{ onLeave }}">Discard changes</button><button type="button" class="cc-btn cc-btn--primary" onClick="{{ onSaveLeave }}">Save changes</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100},"logoSrc":{"editor":"text","default":""},"orgName":{"editor":"text","default":"Albany Medical College"},"embedded":{"editor":"boolean","default":false},"data":{"editor":null},"statuses":{"editor":null},"onSave":{"editor":null},"canEdit":{"editor":null},"mode":{"editor":"enum","options":["rail","cards"],"default":"rail"},"variant":{"editor":"enum","options":["default","linear","v6"],"default":"default"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      sec: '', editing: false, draft: null, tried: false, saved: false,
+      data: {
+        display: { name: '', on: false },
+        ced: { on: false, purchase: '', auth: '', price: '', domain: '', subdomain: '' },
+        store: { on: false, first: '', additional: '', applies: 'certtype', ld: false, certs: [{ type: '8511-LONGFORM-1SIG', desc: '', pkg: '' }, { type: '8511-SPEC', desc: '', pkg: '' }, { type: 'MICROCREDENTIAL', desc: '', pkg: 'none' }] },
+        ld: { on: false, report: false },
+        reorder: { on: false, domain: '', subdomain: '', logos: '' },
+        hold: { on: false, freq: '', day: '', emails: '' },
+        batch: { freq: '', on: false },
+        myhub: { on: false },
+      },
+    };
+  }
+  defs() {
+    // Same sections and fields as Version 1. r.when = shown only when it applies; r.req = required while shown.
+    const HD = [['Mon', 'Monday'], ['Tue', 'Tuesday'], ['Wed', 'Wednesday'], ['Thu', 'Thursday'], ['Fri', 'Friday']];
+    const MD = Array.from({ length: 28 }, (_, i) => [String(i + 1), String(i + 1) + (i === 0 || i === 20 ? 'st' : i === 1 || i === 21 ? 'nd' : i === 2 || i === 22 ? 'rd' : 'th')]);
+    const FREQ = [['daily', 'Daily (Monday–Friday)'], ['weekly', 'Weekly'], ['twice', 'Twice a week'], ['monthly', 'Monthly']];
+    /* Saved settings of other sections: paper ordering decides whether students can report Lost & Damaged in the store; CeD/CeC only keeps both paper sections off. */
+    const D = () => this.props.data || this.state.data || {}; const paperOn = () => !!(D().store || {}).on;
+    const noPaper = () => (D().ced || {}).cedOnly ? 'This organization is CeD/CeC only. Change it in Digital Credentials.' : '';
+    const sched = (help, monthHelp) => [
+      { f: 'freq', label: 'Batch frequency', help, type: 'radio', req: true, options: FREQ },
+      { f: 'weekly', label: 'Batch day', help: 'Select 1 day.', editHelp: true, /* editing instruction: hidden in view mode */ type: 'radio', keepRadio: true, /* weekdays stay visible as radios, matching the Twice a week checkboxes */ req: true, options: HD, when: v => v.freq === 'weekly' },
+      { f: 'twice', label: 'Batch days', help: 'Select 2 days.', type: 'checks', req: true, max: 2, options: HD, when: v => v.freq === 'twice' },
+      { f: 'monthDay', label: 'Day of the month', help: monthHelp, type: 'select', req: true, options: MD, when: v => v.freq === 'monthly' }];
+    return [
+      { key: 'display', label: 'Paper authentication', desc: 'The organization display name shown on the Paper Authentication Page.', setupStatus: 'Set up once a display name is saved. Required for paper clients.', groups: [
+        { title: 'Organization', rows: [{ f: 'name', label: 'Display name', type: 'text', req: true, max: 256, wide: true, /* section header already explains it; the limit only shows as an error */ ph: 'e.g. Organization name' }] }] },
+      { key: 'ced', label: 'Digital credentials', desc: 'CeD/CeC purchase option, authentication, pricing and domain.', toggle: 'Offers digital diplomas and certificates (CeD/CeC).', groups: [
+        { title: 'Digital pricing', rows: [
+          { f: 'purchase', label: 'Purchase option', type: 'radio', req: true, options: [['student', 'Student purchase', 'Students buy their own CeD/CeC at the student purchase price.'], ['buyall', 'Buy all', 'The institution buys every credential. Students aren’t charged.']] },
+          { f: 'price', label: 'Student purchase price', help: 'What students pay for each digital credential in the Student Store.', type: 'money', req: true, ph: '14.95', when: v => v.purchase === 'student' }] },
+        { title: 'Access', rows: [
+          { f: 'auth', label: 'Student sign-in', help: 'How students sign in to the Student Store.', type: 'radio', req: true, options: [['sso', 'SSO'], ['email', 'Email']] }, /* one choice: replaces the separate Email authentication switch (11880 AC 4) */
+          { f: 'domain', label: 'Domain', help: 'Leave out http:// and www.', editHelp: true, type: 'text', req: true, ph: 'school.edu' },
+          { f: 'subdomain', label: 'Subdomain', opt: true, help: 'Only the part before the domain. For sub.school.edu, enter sub.', type: 'text', ph: 'credentials' }] },
+        { title: 'Program', rows: [
+          { f: 'start', label: 'Start date', type: 'date' },
+          { f: 'cedOnly', label: 'CeD/CeC only', help: 'Paper Credentials and Lost & Damaged stay off.', type: 'check', checkLabel: 'This organization has no paper products.' },
+          { f: 'page2', label: 'Separate page 2 for CeC', type: 'check', checkLabel: 'The CeC includes a separate second page.' },
+          { f: 'legacy', label: 'Legacy CeD', help: 'For credentials with a conferral date before the start date.', type: 'check', checkLabel: 'Legacy CeD' }] },
+        { title: 'Tracking', rows: [
+          { f: 'contracts', label: 'Contracts added to repository', type: 'date' },
+          { f: 'internalEmail', label: 'Internal email sent', type: 'date' }] },
+        { title: 'Images', rows: [
+          { f: 'logos', label: 'Logos', type: 'upload', uploadLabel: 'Upload logo' },
+          { f: 'diplomas', label: 'Diploma images', type: 'upload', uploadLabel: 'Upload diploma image' }] }] },
+      { key: 'store', label: 'Paper credentials', desc: 'Paper ordering in the Student Store, pricing and cert type packaging.', toggle: 'Students can order paper credentials in the Student Store.', blockedBy: noPaper, groups: [
+        { title: 'Paper pricing', rows: [
+          { f: 'first', label: 'First paper product price', type: 'money', req: true, ph: '0.00' },
+          { f: 'additional', label: 'Additional paper product price', type: 'money', req: true, ph: '0.00' },
+          { f: 'applies', label: 'Additional price applies', type: 'radio', req: true, options: [['certtype', 'Per cert type (Recommended)', 'The first item of each cert type gets the first price; more of that type get the additional price.'], ['cart', 'Per cart', 'Every item after the first in the cart gets the additional price.']] }] },
+        { title: 'Cert types', certs: true, rows: [] }] },
+      /* Its own section: a school can offer replacements without paper ordering in the store (students then contact the school). */
+      { key: 'ld', label: 'Lost & Damaged', desc: 'Replacements for lost or damaged paper credentials.', toggle: 'Offers replacements for lost or damaged paper credentials.', blockedBy: noPaper, groups: [
+        { title: 'Student Store', rows: [
+          { f: 'report', label: 'Student reporting', help: 'Reports become paper replacement orders automatically.', type: 'check', checkLabel: 'Students can report lost or damaged credentials in the Student Store.', when: () => paperOn() },
+          { f: '_report', label: 'Student reporting', help: 'Students contact the organization to request a replacement. Turn on Paper Credentials to let them report in the Student Store.', type: 'fixed', fixed: 'Off', lockSr: ', read-only until paper ordering is on', when: () => !paperOn() }] }] },
+      { key: 'reorder', label: 'Reorder Management', desc: 'Student reorder site domain and images.', toggle: 'Lets students request reorders.', groups: [
+        { title: 'Student site', rows: [
+          { f: 'domain', label: 'Domain', help: 'Leave out http:// and www.', editHelp: true, type: 'text', req: true, ph: 'school.edu' },
+          { f: 'subdomain', label: 'Subdomain', opt: true, help: 'Only the part before the domain. For sub.school.edu, enter sub.', type: 'text', ph: 'reorder' }] },
+        { title: 'Images', rows: [{ f: 'logos', label: 'Logos', help: 'JPG or PNG only.', type: 'upload', req: true, uploadLabel: 'Upload logo' }] }] },
+      { key: 'hold', label: 'Hold Management', desc: 'Hold batching frequency and notification email.', toggle: 'Batches orders on hold on a schedule.', groups: [
+        { title: 'Schedule', rows: sched('Batched only when 6 or more documents are on hold. Otherwise they wait for the next batch date.', 'Batching is due on this date, including weekends and holidays.') },
+        { title: 'Notifications', rows: [{ f: 'emails', label: 'Email', help: 'Receives batch order notifications and alerts when records on hold are expiring soon.', type: 'emails', max: 1, req: true, ph: 'name@school.edu' }] }] },
+      { key: 'batch', label: 'API order batching', desc: 'When API orders are batched for this organization. Universal API batches run at 1:00 PM ET, for both standard and rush orders.', toggle: "Batches this organization's API orders on a schedule.", groups: [
+        { title: 'Standard orders', rows: sched(undefined, 'Runs on this date, including weekends.') },
+        { title: 'Rush orders', rows: [{ f: '_rush', label: 'Batch frequency', help: '5-day, 3-day and 1-day orders. Set by Paradigm.', type: 'fixed', fixed: 'Daily (Monday–Friday)' }] }] },
+      // Integrations (MyHub) removed: out of scope.
+    ];
+  }
+  sizeTxt(s) { return s ? String(s).split('×').join(' × ') + ' in' : ''; }
+  pkgOpts() { return [['large-tube', 'Large Tube', '18×3×3'], ['small-tube', 'Small Tube', '15×2×2'], ['mailer-5', '#5 Mailer', '13×10×1'], ['mailer-4', '#4 Mailer', '15×13×1'], ['mailer-6', '#6 Mailer', '18×13×1'], ['mailer-7', '#7 Mailer', '21×17×1'], ['none', 'No packaging required']]; }
+  vis(r, v) { return !r.when || r.when(v || {}); }
+  /* Image uploads are stored in a folder named after the domain. Reorder unlocks as soon as a valid domain is typed, so the domain and logos save together; Digital credentials waits for a saved domain. */
+  upLocked(sec, all, v) { if (sec === 'ced') return !String((all.ced || {}).domain || '').trim(); if (sec !== 'reorder') return false; const d = String((v || {}).domain || '').trim(); return !d || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(d); }
+  // Error for one row (only rows that are showing and required).
+  rowErr(r, v) {
+    /* Domain and subdomain: no protocol, spaces or slashes (checked whenever a value is entered; Domain is also required). */
+    if ((r.f === 'domain' || r.f === 'subdomain') && this.vis(r, v)) { const d = String(v[r.f] == null ? '' : v[r.f]).trim(); if (d) { if (/^[a-z]+:\/\//i.test(d) || /[\s\/]/.test(d)) return r.f === 'domain' ? 'Enter the domain only, like school.edu, without http:// or spaces.' : 'Enter the subdomain only, like reorder, without http:// or spaces.'; if (r.f === 'domain' ? !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(d) : !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i.test(d)) return r.f === 'domain' ? 'Enter a valid domain, like school.edu.' : 'Use only letters, numbers and hyphens, like reorder.'; } }
+    if (!r.req || !this.vis(r, v)) return '';
+    const x = v[r.f];
+    if (r.type === 'upload') return (+x || 0) > 0 || (Array.isArray(v[r.f + 'Files']) && v[r.f + 'Files'].length) ? '' : 'Upload at least one ' + (r.f === 'logos' ? 'logo' : 'file') + '.';
+    if (r.type === 'checks') return (x || []).length === (r.max || 1) ? '' : 'Select exactly ' + (r.max || 1) + ' days.';
+    if (r.type === 'emails') { const L = this.emailList(x).filter(e => e.trim()); if (!L.length) return r.max === 1 ? 'Enter an email address, like name@school.edu.' : 'Enter at least one email address.'; return L.every(e => /^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(e.trim())) ? '' : (r.max === 1 ? 'Enter a valid email address, like name@school.edu.' : 'Enter valid email addresses, like name@school.edu.'); }
+    if (r.type === 'money') return /^\d+(\.\d{1,2})?$/.test(String(x || '').trim()) && parseFloat(x) > 0 ? '' : 'Enter a price, like 45.00.';
+    if (r.f === 'weekly' && !String(x == null ? '' : x).trim()) return 'Select a day.';
+    if (!String(x == null ? '' : x).trim()) return r.type === 'radio' || r.type === 'select' ? 'Select an option.' : 'Enter ' + (r.type === 'area' ? 'at least one email address' : 'a ' + r.label.toLowerCase()) + '.';
+    if (r.max && String(x == null ? '' : x).trim().length > r.max) { const o = String(x).trim().length - r.max; return o + (o === 1 ? ' character' : ' characters') + ' too many. Use ' + r.max + ' or fewer.'; }
+    return '';
+  }
+  /* Money: keep digits and one decimal point (max 2 places) while typing; format to 0.00 when leaving the field. */
+  moneyClean(v) { let t = String(v == null ? '' : v).replace(/[^0-9.]/g, ''); const i = t.indexOf('.'); if (i > -1) t = t.slice(0, i + 1) + t.slice(i + 1).replace(/\./g, '').slice(0, 2); return t; }
+  moneyNum(v) { const t = this.moneyClean(v); if (!t || t === '.') return null; const n = parseFloat(t); return isNaN(n) ? null : n; }
+  moneyFmt(v) { const n = this.moneyNum(v); return n == null ? '' : n.toFixed(2); }
+  /* Deep links for the user stories: ?section=display-name&edit=1, &dn=empty (required error), &dn=long (too long error), &dn=saved (success toast). Used once per page load. */
+  applyLink() {
+    if (this._lp) return; this._lp = true;
+    let q; try { q = new URLSearchParams(((typeof window !== 'undefined' && window.__ccInitQ != null ? window.__ccInitQ : location.search) || '') + '&' + (location.hash || '').replace(/^#/, '')); } catch (e) { return; }
+    const M = { paper: 'store', 'paper-credentials': 'store', 'lost-damaged': 'ld', ld: 'ld', 'display-name': 'display', display: 'display', 'paper-authentication': 'display', batching: 'batch', batch: 'batch', ced: 'ced', digital: 'ced', 'digital-credentials': 'ced', store: 'store', 'student-store': 'store', reorder: 'reorder', reorders: 'reorder', hold: 'hold', holds: 'hold' };
+    const sec = M[q.get('section') || '']; if (!sec) return;
+    /* The host can remount this section while the page loads, so any instance mounted in the first few seconds applies the link; later visits don't. */
+    try { const t = window.__ccSetLinkT; if (t && Date.now() - t > 4000) return; if (!t) window.__ccSetLinkT = Date.now(); } catch (e) {}
+    setTimeout(() => {
+      const all = this.props.data || this.state.data; const base = Object.assign({}, all[sec] || {}); const dn = q.get('dn') || q.get('demo') || '';
+      if (this.props.canEdit === false && dn !== 'saved') return this.setState({ sec }); /* view-only users never land in Edit */
+      if (dn === 'empty') return this.setState({ sec, editing: true, draft: Object.assign(base, { on: true, name: '' }), tried: true });
+      if (dn === 'long') return this.setState({ sec, editing: true, draft: Object.assign(base, { on: true, name: (this.props.orgName || 'Albany Medical College') + ' School of Health Sciences, Graduate Studies, Continuing Professional Education, Clinical Research Training, Nursing and Allied Health Programs, Office of the Registrar, Credential Services for Graduates and Alumni Records, Main Campus, USA' } /* over 256 for any sample org */), tried: true });
+      if (dn === 'error') return this.setState({ sec, editing: true, draft: Object.assign(base, { on: true }, sec === 'reorder' || sec === 'ced' ? { domain: 'https://school.edu' } : sec === 'store' ? { first: '', certs: (base.certs || []).map((c, i) => i === 0 ? Object.assign({}, c, { desc: '', pkg: '' }) : c) } /* price and the first cert type left blank */ : { freq: base.freq || 'weekly', weekly: '', twice: [], monthDay: '' }), tried: true });
+      /* &demo=filetype: Edit with the wrong-file message on Logos. */
+      if (dn === 'filetype') return this.setState({ sec, editing: true, draft: base, tried: false, fileErr: { logos: 'Upload a JPG or PNG file.' } });
+      if (dn === 'saved') { this.setState({ sec }); if (typeof this.props.onSave === 'function') this.props.onSave(sec, base); else this.setState({ saved: true }); return; }
+      /* &demo=off: Edit with the section switched off. &demo=on: Edit, switched on with nothing chosen (&tried=1 adds the errors). &demo=unsaved: Edit with a change and the Unsaved changes dialog open. */
+      if (dn === 'off') return this.setState({ sec, editing: true, draft: Object.assign(base, { on: false }), tried: false });
+      if (dn === 'on') return this.setState({ sec, editing: true, draft: Object.assign(base, { on: true, freq: '', weekly: '', twice: [], monthDay: '' }), tried: q.get('tried') === '1' });
+      if (dn === 'unsaved') return this.setState({ sec, editing: true, draft: Object.assign(base, sec === 'batch' ? { freq: 'monthly', monthDay: '15' } : sec === 'hold' ? { freq: 'twice', weekly: '', twice: ['Tue', 'Thu'] } : sec === 'store' ? { ld: !base.ld } : {}) /* a real pending change behind the Unsaved changes dialog */, tried: false, leaveFn: () => this.setState({ editing: false, draft: null, tried: false }) });
+      if (q.get('edit') === '1') return this.setState({ sec, editing: true, draft: base, tried: false });
+      this.setState({ sec });
+    }, 400); /* after the host has loaded its demo data (dn=prefill) */
+  }
+  /* Dates: stored as YYYY-MM-DD, shown and typed as MM/DD/YYYY (same as Admin > Action log). */
+  fmtUS(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); return m ? m[2] + '/' + m[3] + '/' + m[1] : ''; }
+  isoOf(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  /* Design system date field: a text field (MM/DD/YYYY) with a calendar button that opens the design system calendar (cc-calendar), one date at a time. */
+  dateVM(r, id, x, set) {
+    const st = this.state, open = st.dOpen === r.f, raw = (st.dRaw || {})[r.f];
+    const close = (focusField) => { this.setState({ dOpen: null }); if (focusField) setTimeout(() => { const el = document.getElementById(id); if (el) el.focus(); }, 30); };
+    const openCal = () => { const cur = x || this.isoOf(new Date()); this.setState({ dOpen: r.f, calY: +cur.slice(0, 4), calM: +cur.slice(5, 7) - 1, calView: 'days' }); };
+    const commit = (v0) => { const v = String(v0 == null ? '' : v0).trim(); const raws = Object.assign({}, this.state.dRaw || {}); delete raws[r.f]; const errs = Object.assign({}, this.state.dErr || {});
+      if (!v) { delete errs[r.f]; this.setState({ dRaw: raws, dErr: errs }); set(r.f, ''); return; }
+      const m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/.exec(v); const d = m && new Date(+m[3], +m[1] - 1, +m[2]);
+      if (!m || d.getMonth() !== +m[1] - 1 || d.getDate() !== +m[2]) { errs[r.f] = 'Enter a valid date as MM/DD/YYYY.'; raws[r.f] = v; this.setState({ dRaw: raws, dErr: errs }); return; }
+      delete errs[r.f]; this.setState({ dRaw: raws, dErr: errs }); set(r.f, this.isoOf(d)); };
+    const vm = { dVal: raw != null ? raw : this.fmtUS(x), dOpen: open, dExp: String(open), dBtnId: id + '-cal', dHintId: id + '-fmt', dBtnAria: 'Choose ' + r.label.toLowerCase() + ' from calendar',
+      onDInput: (e) => this.setState({ dRaw: Object.assign({}, this.state.dRaw || {}, { [r.f]: e.target.value }) }),
+      onDBlur: (e) => { if ((this.state.dRaw || {})[r.f] != null) commit(e.target.value); },
+      onDKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(e.target.value); } else if (e.key === 'ArrowDown' && !open) { e.preventDefault(); openCal(); } else if (e.key === 'Escape' && open) { e.stopPropagation(); close(true); } else if (e.key === 'Tab' && open) close(false); },
+      onDClick: () => { if (!open) openCal(); },
+      onDBtn: () => { if (open) close(true); else openCal(); },
+      onCalKey: (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(true); } },
+      cal: { days: [], weekdays: [], months: [], years: [] } };
+    if (!open) return vm;
+    const y = st.calY, mo = st.calM, view = st.calView || 'days';
+    const mn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const today = this.isoOf(new Date());
+    const mk = (yy, mm, dd, outside) => { const iso = yy + '-' + String(mm + 1).padStart(2, '0') + '-' + String(dd).padStart(2, '0'); const sel = iso === x;
+      return { label: String(dd), aria: new Date(yy, mm, dd).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }), pressed: String(sel), outside: String(outside && !sel), today: String(iso === today && !sel),
+        onClick: () => { const raws = Object.assign({}, this.state.dRaw || {}), errs = Object.assign({}, this.state.dErr || {}); delete raws[r.f]; delete errs[r.f]; this.setState({ dRaw: raws, dErr: errs, dOpen: null }); set(r.f, iso); setTimeout(() => { const el = document.getElementById(id); if (el) el.focus(); }, 40); } }; };
+    const startWd = new Date(y, mo, 1).getDay(), dim = new Date(y, mo + 1, 0).getDate(), pdim = new Date(y, mo, 0).getDate(); const cells = [];
+    for (let i = startWd; i > 0; i--) cells.push(mk(mo === 0 ? y - 1 : y, mo === 0 ? 11 : mo - 1, pdim - i + 1, true));
+    for (let d = 1; d <= dim; d++) cells.push(mk(y, mo, d, false));
+    let nd = 1; while (cells.length < 42) cells.push(mk(mo === 11 ? y + 1 : y, mo === 11 ? 0 : mo + 1, nd++, true));
+    const yrs = []; for (let yy = new Date().getFullYear() + 2; yy >= 1980; yy--) yrs.push({ label: String(yy), pressed: String(yy === y), onClick: () => this.setState({ calY: yy, calView: 'days' }) });
+    vm.cal = { viewDays: view === 'days', viewMonths: view === 'months', viewYears: view === 'years', monthLabel: mn[mo].slice(0, 3), yearLabel: String(y), title: r.label,
+      weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(l => ({ l })), days: cells,
+      months: mn.map((nm, i) => ({ label: nm, pressed: String(i === mo), onClick: () => this.setState({ calM: i, calView: 'days' }) })), years: yrs,
+      onPrev: () => this.setState(mo === 0 ? { calM: 11, calY: y - 1 } : { calM: mo - 1 }), onNext: () => this.setState(mo === 11 ? { calM: 0, calY: y + 1 } : { calM: mo + 1 }),
+      onMonths: () => this.setState({ calView: view === 'months' ? 'days' : 'months' }), onYears: () => this.setState({ calView: view === 'years' ? 'days' : 'years' }), onBack: () => this.setState({ calView: 'days' }) };
+    return vm;
+  }
+  emailList(x) { return Array.isArray(x) ? x : String(x || '').split(/[;,]/).map(e => e.trim()).filter(Boolean); }
+  certErrs(v) { const e = {}; (v.certs || []).forEach((c, i) => { const r = {}; if (!String(c.desc || '').trim()) r.desc = 'Add a description.'; else if (c.desc.length > 300) r.desc = 'Use 300 characters or fewer.'; if (!c.pkg) r.pkg = 'Select packaging.'; if (r.desc || r.pkg) e[i] = r; }); return e; }
+  sectionErrs(def, v) {
+    if (def.toggle && !v.on) return 0;
+    let n = 0; def.groups.forEach(g => { g.rows.forEach(r => { if (this.rowErr(r, v)) n++; }); if (g.certs) n += Object.keys(this.certErrs(v)).length; });
+    return n;
+  }
+
+  // Title Case labels, matching the Details tab.
+  tc(x) { const small = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'of', 'on', 'or', 'per', 'the', 'to', 'vs', 'via']; return String(x || '').split(' ').map((w, i) => (/[A-Z]/.test(w.slice(1)) || /^[A-Z]{2,}/.test(w)) ? w : (i > 0 && small.indexOf(w.toLowerCase()) > -1) ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
+  status(def, v) {
+    if (def.toggle) return v.on ? 'done' : 'off'; // on/off sections are only On or Off: saving On requires every required field
+    return this.sectionErrs(def, v) ? 'todo' : 'done';
+  }
+  /* Dropdown (single choice): the platform's established listbox dropdown, the same look as the organization picker (orgPickVM) without the search. Used in place of native selects. */
+  ddVM(key, cfg) {
+    const st = this.state; const ok = 'ddOpen_' + key; const open = !!st[ok];
+    const all = cfg.options || []; const val = String(cfg.value == null ? '' : cfg.value);
+    const selIdx = all.findIndex(o => String(o.value) === val); const sel = selIdx > -1 ? all[selIdx] : null;
+    const btnId = cfg.id || ('dd-' + key); const listId = btnId + '-list';
+    const focusBtn = () => setTimeout(() => { const b = document.getElementById(btnId); if (b) b.focus(); }, 40);
+    const focusOpt = (i) => setTimeout(() => { const n = all.length; if (!n) return; const k = Math.max(0, Math.min(n - 1, i)); const el = document.getElementById(listId + '-' + k); if (el) el.focus({ preventScroll: true }); }, 40);
+    const closeAll = () => { const p = {}; Object.keys(this.state).forEach(k => { if (k.indexOf('ddOpen_') === 0 && this.state[k]) p[k] = false; }); if (Object.keys(p).length) this.setState(p); };
+    const openAt = (fi) => {
+      const b = document.getElementById(btnId); const r = b ? b.getBoundingClientRect() : { left: 8, top: 8, bottom: 8, width: 240 };
+      const h = Math.min(296, all.length * 40 + 18); let top = r.bottom + 4;
+      if (top + h > window.innerHeight - 8 && r.top - 4 - h > 8) top = r.top - 4 - h;
+      const w = Math.max(r.width, cfg.minW || 200); const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+      const p = { ddPos: { top: Math.round(top), left: Math.round(left), w: Math.round(w) } };
+      Object.keys(st).forEach(k => { if (k.indexOf('ddOpen_') === 0 && st[k]) p[k] = false; }); p[ok] = true;
+      this._ddAt = Date.now(); this.setState(p); focusOpt(fi);
+      /* Opening upward: place it from the list's real height so it never covers the button's focus ring */ if (top < r.bottom) setTimeout(() => { const l = document.getElementById(listId); if (!l) return; const t2 = Math.max(8, Math.round(r.top - 6 - l.offsetHeight)); if (t2 !== p.ddPos.top) this.setState({ ddPos: Object.assign({}, p.ddPos, { top: t2 }) }); }, 0);
+      if (!this._ddScroll) { this._ddScroll = (e) => { const tg = e && e.target; if (tg && tg.closest && tg.closest('[role="listbox"]')) return; if (Date.now() - (this._ddAt || 0) < 250) return; closeAll(); }; window.addEventListener('scroll', this._ddScroll, true); window.addEventListener('resize', this._ddScroll); }
+    };
+    const pos = st.ddPos || { top: 0, left: 0, w: 240 };
+    const text = sel ? sel.label : (cfg.placeholder || 'Select');
+    const close = () => this.setState({ [ok]: false });
+    return {
+      btnId, listId, open, exp: open ? 'true' : 'false', invalid: cfg.invalid ? 'true' : 'false',
+      text, phCls: sel ? '' : 'is-ph', fg: sel ? 'var(--gray-900)' : 'var(--gray-500)', fw: sel ? 'var(--fw-medium)' : 'var(--fw-regular)',
+      aria: (cfg.label || 'Select') + ': ' + text, label: cfg.label || '',
+      top: pos.top, left: pos.left, w: pos.w,
+      onToggle: () => { if (open) close(); else openAt(Math.max(0, selIdx)); },
+      onClose: close,
+      options: all.map((o, i) => { const isSel = i === selIdx; return { id: listId + '-' + i, label: o.label, isSel, selAttr: isSel ? 'true' : 'false', onClick: () => { this.setState({ [ok]: false }); cfg.onPick(o.value); focusBtn(); } }; }),
+      onKey: (e) => {
+        const k = e.key; const tg = e.target; const inList = !!(tg && tg.getAttribute && tg.getAttribute('role') === 'option');
+        if (!open) { if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault(); openAt(selIdx > -1 ? selIdx : (k === 'ArrowUp' ? all.length - 1 : 0)); } return; }
+        if (k === 'Escape' || k === 'Tab') { e.preventDefault(); e.stopPropagation(); close(); focusBtn(); return; }
+        if (!inList) { if (k === 'ArrowDown') { e.preventDefault(); focusOpt(Math.max(0, selIdx)); } return; }
+        const cur = all.findIndex((o, i) => (listId + '-' + i) === tg.id);
+        if (k === 'ArrowDown') { e.preventDefault(); focusOpt(cur + 1); }
+        else if (k === 'ArrowUp') { e.preventDefault(); focusOpt(cur - 1); }
+        else if (k === 'Home') { e.preventDefault(); focusOpt(0); }
+        else if (k === 'End') { e.preventDefault(); focusOpt(all.length - 1); }
+      },
+    };
+  }
+  renderVals() {
+    /* Sticky settings header: a soft shadow under it only while fields scroll beneath it (data-stuck). Installed once for the page. */
+    try { if (!window.__ccSheadShadow) { window.__ccSheadShadow = true; const upd = () => document.querySelectorAll('.v6-shead').forEach(h => { const cs = getComputedStyle(h); const t = parseFloat(cs.top) || 0; const on = cs.position === 'sticky' && h.getBoundingClientRect().top <= t + 0.5; if (on !== h.hasAttribute('data-stuck')) h.toggleAttribute('data-stuck', on); }); document.addEventListener('scroll', upd, true); window.addEventListener('resize', upd); setTimeout(upd, 0); } } catch (e) {}
+    const st = this.state; const defs = this.defs().map(d => Object.assign({}, d, { label: this.tc(d.label), groups: d.groups.map(g => Object.assign({}, g, { title: this.tc(g.title), rows: g.rows.map(r => Object.assign({}, r, { label: this.tc(r.label) })) })) })).sort((a, b) => a.label.localeCompare(b.label)).filter(d => d.key !== 'display' || ((this.props.data || {}).display || {}).paper !== false); // Alphabetical; Paper Authentication only for paper clients (client type is set before the org is added)
+    // mode 'cards': section cards open one section at a time (no side menu); fields show as text until Edit.
+    const cards = this.props.mode === 'cards';
+    // Version 6 ('v6'): Linear-style rows. Label and description use the full width; the value or control sits on the right. Yes/no settings are switches, choices are dropdowns.
+    const v7 = this.props.variant === 'v7'; const v8 = this.props.variant === 'v8'; const v6 = this.props.variant === 'v6' || v7 || v8; const lin = this.props.variant === 'linear' || v6; const textView = this.props.viewText !== false; // values show as plain text until Edit (all layouts)
+    const secKey = cards ? st.cardSec : (st.sec || defs[0].key); /* opens on the first section (alphabetical) */ const home = cards && !secKey;
+    const def = defs.find(d => d.key === (secKey || defs[0].key));
+    // In the Internal prototype the host passes the org's real settings, its statuses and onSave; standalone uses sample data.
+    const all = this.props.data || st.data; const hostSt = this.props.statuses || null;
+    const v = st.editing && st.draft ? st.draft : (all[secKey] || {});
+    const statuses = {}; defs.forEach(d => { statuses[d.key] = d.blockedBy && d.blockedBy() ? 'off' /* CeD/CeC only */ : hostSt && hostSt[d.key] ? hostSt[d.key] : this.status(d, all[d.key] || {}); });
+    this.applyLink();
+    const canEdit = this.props.canEdit !== false; const emb = !!this.props.embedded;
+    const lbl = (s, k) => s === 'done' ? ((defs.find(d => d.key === k) || {}).toggle ? 'On' : 'Set up') : s === 'off' ? 'Off' : k === 'display' ? 'Not set up' : 'Needs setup'; /* sections without on/off (API order batching) read Set up or Needs setup */
+    const doneN = defs.filter(d => statuses[d.key] === 'done').length, offN = defs.filter(d => statuses[d.key] === 'off').length, todoN = defs.length - doneN - offN;
+    const ro = !st.editing; const blocked = def.blockedBy ? def.blockedBy() : ''; const isOff = def.toggle && (!v.on || !!blocked); const tv = textView && ro;
+    const dirty = st.editing && JSON.stringify(st.draft || {}) !== JSON.stringify(all[secKey] || {});
+    const go = (fn) => { if (dirty) { this.setState({ leaveFn: fn }); return; } fn(); };
+    const reset = { editing: false, draft: null, tried: false, saved: false, fileErr: null, dRaw: null, dErr: null, dOpen: null };
+    // Uploaded images: a list of { name, ext, at }. Older data only has a count, so name sample files from the org.
+    const slug = String(this.props.orgName || 'organization').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const fileList = (r, vv) => Array.isArray(vv[r.f + 'Files']) ? vv[r.f + 'Files'] : Array.from({ length: +vv[r.f] || 0 }, (_, i) => ({ name: slug + '-' + (r.f === 'logos' ? 'logo' : 'diploma') + (i ? '-' + (i + 1) : '') + '.png', ext: 'PNG', at: 'Nov 18, 2026, 12:00:00 AM' }));
+    const stamp = () => { const d = new Date(); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' }); };
+    const setFiles = (r, arr) => this.setState({ draft: Object.assign({}, this.state.draft, { [r.f]: arr.length, [r.f + 'Files']: arr }), saved: false });
+    const optLabel = (r, val) => (((r.options || []).find(o => o[0] === val) || [])[1] || '');
+    const shown = (r, vv) => { const x = vv[r.f];
+      if (r.type === 'upload') return x ? x + (x === 1 ? ' file' : ' files') : 'None uploaded';
+      if (r.type === 'emails') return this.emailList(x).join(', ') || '—';
+      if (r.type === 'check') return x ? (r.on || 'On') : (r.off || 'Off');
+      if (r.type === 'checks') return (x || []).map(k => optLabel(r, k)).filter(Boolean).join(', ') || '—';
+      if (r.type === 'radio' || r.type === 'select') return optLabel(r, x) || '—';
+      if (r.type === 'date') return this.fmtUS(x) || '—';
+      if (r.type === 'money') { const n = this.moneyNum(x); return n == null ? '—' : '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+      return String(x || '').trim() || '—'; };
+    const set = (f, val) => this.setState({ draft: Object.assign({}, st.draft, { [f]: val }), saved: false });
+    const errOf = (r) => st.editing && st.tried && !isOff ? this.rowErr(r, v) : '';
+    const cErr = st.editing && st.tried && !isOff ? this.certErrs(v) : {};
+    const groups = [];
+    // View: On/Off is the badge next to the title only. Edit: a Status row with a labelled switch opens the form; the badge keeps showing the saved state.
+    /* V6/V7: Status is always the first group: a badge when viewing, the switch in Edit (same spot, nothing jumps). */
+    const stView = v6 && def.toggle && !st.editing;
+    /* Paper Authentication has no On/Off: it's Set up or Not set up depending on whether a display name is saved. */
+    if (def.setupStatus && v6 && def.statusGroup) { const ok = /* off: with one field, an empty name shows 'Not set up' in place of the value instead */ !!String(((all[def.key] || {}).name) || '').trim(); groups.push({ title: 'Status', mutedCls: '', isCerts: false, certRows: [], rows: [{ id: 'v2-on', label: def.label, help: def.setupStatus, hasHelp: true, helpId: 'v2-on-help', errId: 'v2-on-err', descBy: 'v2-on-help', isSwitch: false, isTextView: false, isBadgeView: true, display: ok ? 'Set up' : 'Not set up', badgeCls: ok ? 'cc-badge--success' : 'cc-badge--warning', isText: false, isMoney: false, isArea: false, isSelect: false, isUpload: false, isRadio: false, isCheck: false, isChecks: false, isFiles: false, filesEdit: false, files: [], noFiles: false, ctlCls: '', hasError: false }] }); }
+    /* Blocked (CeD/CeC only): the switch becomes an Off badge with the reason, in view and edit. */
+    if (def.toggle && (st.editing || v6) && blocked) groups.push({ title: 'Status', mutedCls: '', isCerts: false, certRows: [], rows: [{ id: 'v2-on', label: def.label, help: blocked, hasHelp: true, helpId: 'v2-on-help', errId: 'v2-on-err', descBy: 'v2-on-help', isSwitch: false, isTextView: false, isBadgeView: true, display: 'Off', badgeCls: '', isText: false, isMoney: false, isArea: false, isSelect: false, isUpload: false, isRadio: false, isCheck: false, isChecks: false, isFiles: false, filesEdit: false, files: [], noFiles: false, ctlCls: '', hasError: false }] });
+    else if (def.toggle && (st.editing || v6)) groups.push({ title: 'Status', mutedCls: '', isCerts: false, certRows: [], rows: [{ id: 'v2-on', label: def.label, help: def.toggle, hasHelp: true, helpId: 'v2-on-help', errId: 'v2-on-err', descBy: 'v2-on-help', isSwitch: !stView, isTextView: false, isBadgeView: stView, display: v.on ? 'On' : 'Off', badgeCls: v.on ? 'cc-badge--success' : '', isText: false, isMoney: false, isArea: false, isSelect: false, isUpload: false, isRadio: false, isCheck: false, isChecks: false, isFiles: false, filesEdit: false, files: [], noFiles: false, checked: String(!!v.on), swText: v.on ? 'On' : 'Off', roAttr: 'false', onToggle: () => set('on', !v.on), ctlCls: '', hasError: false }] });
+    // A section that's off shows only its Status row; its settings appear (editable) once it's switched on in Edit.
+    let cq = { opts: [] };
+    if (!isOff) def.groups.forEach((g, gi) => {
+      if (g.certs) {
+        const pk = this.pkgOpts();
+        const q = String(st.certQ || '').trim().toLowerCase(); const cf = st.certF || '';
+        const showIdx = (v.certs || []).map((c, i) => i).filter(i => { const c = v.certs[i]; return (!q || (c.type + ' ' + (c.desc || '')).toLowerCase().indexOf(q) > -1) && (!cf || (cf === '__missing' ? (!String(c.desc || '').trim() || !c.pkg) : cf === '__unset' ? !c.pkg : c.pkg === cf)); });
+        const miss = (c) => !String(c.desc || '').trim() || !c.pkg; const needN = (v.certs || []).filter(miss).length;
+        const sel = !tv ? (st.certSel || []).filter(i => i < (v.certs || []).length) : []; const shownSel = showIdx.filter(i => sel.indexOf(i) > -1).length; const bd = st.certBd || '';
+        const putCerts = (fn) => { const cs = (this.state.draft.certs || []).map((x, i) => sel.indexOf(i) > -1 ? Object.assign({}, x, fn(x)) : Object.assign({}, x)); set('certs', cs); };
+        /* select-all shows a dash when only some shown rows are picked; textareas grow with their text (JS fallback where field-sizing isn't supported) */
+        if (!tv) setTimeout(() => { try { const a = document.getElementById('v3-call'); if (a) a.indeterminate = shownSel > 0 && shownSel < showIdx.length; if (!(window.CSS && CSS.supports && CSS.supports('field-sizing', 'content'))) document.querySelectorAll('.v3-grow').forEach(t => { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }); } catch (er) {} }, 0);
+        cq = { q: st.certQ || '', f: cf, bulk: st.certBulk || '', editing: !tv, viewing: tv, shownN: showIdx.length, applyOff: true,
+          hasNeed: needN > 0, needText: needN + (needN === 1 ? ' needs setup' : ' need setup'),
+          hasSel: sel.length > 0, selN: sel.length, selText: sel.length + ' selected', selText2: sel.length + (sel.length === 1 ? ' cert type' : ' cert types'),
+          allSel: showIdx.length > 0 && shownSel === showIdx.length,
+          onAll: () => { const on = showIdx.length > 0 && shownSel === showIdx.length; this.setState({ certSel: on ? sel.filter(i => showIdx.indexOf(i) < 0) : sel.concat(showIdx.filter(i => sel.indexOf(i) < 0)) }); },
+          onClearSel: () => this.setState({ certSel: [], certBdOpen: false, certBd: '' }),
+          descOpen: !!st.certBdOpen && sel.length > 0, descExp: String(!!st.certBdOpen),
+          onDescOpen: () => { const o = !this.state.certBdOpen; this.setState({ certBdOpen: o }); if (o) setTimeout(() => { const el = document.getElementById('v3-bd'); if (el) el.focus(); }, 40); },
+          onDescCancel: () => this.setState({ certBdOpen: false, certBd: '' }),
+          bd, onBd: (e) => this.setState({ certBd: e.target.value }), bdOff: !bd.trim() || bd.length > 300,
+          bdHasCount: bd.length >= 280, bdCount: bd.length > 300 ? (bd.length - 300) + ' characters too many' : bd.length + '/300', bdCountCls: bd.length > 300 ? 'cc-hint--error' : '',
+          onDescApply: () => { if (!bd.trim() || bd.length > 300) return; putCerts(() => ({ desc: bd })); this.setState({ certBdOpen: false, certBd: '' }); },
+          opts: pk.map(o => ({ value: o[0], label: o[1] })), shownText: 'Showing ' + showIdx.length + ' of ' + (v.certs || []).length + ' cert types',
+          onQ: (e) => this.setState({ certQ: e.target.value }),
+          fDd: this.ddVM('v3-cf', { id: 'v3-cf', label: 'Show', value: cf, minW: 240, options: [{ value: '', label: 'All cert types' }, { value: '__missing', label: 'Needs setup' }].concat(pk.map(o => ({ value: o[0], label: o[1] }))), onPick: (x) => this.setState({ certF: x }) }),
+          bulkDd: this.ddVM('v3-cb', { id: 'v3-cb', label: 'Set packaging for ' + sel.length + ' selected', value: '', placeholder: 'Set packaging', minW: 260, options: pk.map(o => ({ value: o[0], label: o[1] + (o[2] ? ' (' + this.sizeTxt(o[2]) + ')' : '') })), onPick: (x) => putCerts(() => ({ pkg: x })) }), onF: (e) => this.setState({ certF: e.target.value }), onBulk: (e) => this.setState({ certBulk: e.target.value }),
+          onApply: () => { const cs = (st.draft.certs || []).map((x, i) => showIdx.indexOf(i) > -1 ? Object.assign({}, x, { pkg: st.certBulk }) : Object.assign({}, x)); set('certs', cs); this.setState({ certBulk: '' }); } };
+        groups.push({ title: g.title, mutedCls: '', isCerts: true, rows: [], certRows: (v.certs || []).map((c, i) => ({ c, i })).filter(o => showIdx.indexOf(o.i) > -1).map(({ c, i }) => { const e = cErr[i] || {}; const id = 'v2-cert-' + i;
+          const po = pk.find(o => o[0] === c.pkg) || []; const dl = String(c.desc || '').length;
+          return { type: c.type, desc: c.desc || '', descView: c.desc || '—', pkgView: po[1] || '—', pkgSize: this.sizeTxt(po[2]), hasSize: !!po[2], pkg: c.pkg || '',
+            sel: sel.indexOf(i) > -1, selId: id + '-s', selAria: 'Select ' + c.type, onSel: () => { const s0 = (this.state.certSel || []).slice(); const k = s0.indexOf(i); if (k > -1) s0.splice(k, 1); else s0.push(i); this.setState({ certSel: s0 }); },
+            missing: miss(c), missText: !String(c.desc || '').trim() && !c.pkg ? 'Missing details' : !c.pkg ? 'Missing packaging' : 'Missing description',
+            descErrId: id + '-de', descBy: e.desc ? id + '-de' : null, dHasCount: !e.desc && dl >= 280, dCount: dl > 300 ? (dl - 300) + (dl - 300 === 1 ? ' character' : ' characters') + ' too many' : dl + '/300', dCountCls: dl > 300 ? 'cc-hint--error' : '', dCountSr: dl > 300 ? (dl - 300) + ' characters too many' : (300 - dl) + ' characters remaining', viewing: tv, editing: !tv, descId: id + '-d', pkgId: id + '-p',
+            options: pk.map(o => ({ value: o[0], label: o[1] + (o[2] ? ' (' + o[2] + ')' : '') })),
+            dd: this.ddVM(id + '-p', { id: id + '-p', label: 'Packaging for ' + c.type, value: c.pkg || '', placeholder: 'Select packaging', minW: 240, invalid: !!e.pkg, options: pk.map(o => ({ value: o[0], label: o[1] + (o[2] ? ' (' + this.sizeTxt(o[2]) + ')' : '') })), onPick: (x) => { const cs = (this.state.draft.certs || []).map(y => Object.assign({}, y)); cs[i].pkg = x; set('certs', cs); } }),
+            descErr: e.desc || '', hasDescErr: !!e.desc, pkgErr: e.pkg || '', hasPkgErr: !!e.pkg, descInv: e.desc ? 'true' : 'false', pkgInv: e.pkg ? 'true' : 'false',
+            onDesc: (ev) => { const cs = (st.draft.certs || []).map(x => Object.assign({}, x)); cs[i].desc = ev.target.value; set('certs', cs); },
+            onPkg: (ev) => { const cs = (st.draft.certs || []).map(x => Object.assign({}, x)); cs[i].pkg = ev.target.value; set('certs', cs); } }; }),
+          certCount: (v.certs || []).length + ' cert types' });
+        return;
+      }
+      const rows = g.rows.filter(r => this.vis(r, v)).map(r => {
+        const id = 'v2-' + def.key + '-' + r.f; const err = errOf(r); const x = v[r.f];
+        const t = v6 ? (r.type === 'radio' && !r.keepRadio && (r.options || []).length > 3 ? 'select' /* 2–3 choices stay radio buttons; 4 or more become a dropdown */ : r.type === 'check' ? 'switch' : r.type) : r.type;
+        const optDesc = (((r.options || []).find(o => o[0] === x) || [])[2]) || '';
+        const dom = String(v.domain || '').trim(); const domOk = !!dom && !this.rowErr({ f: 'domain', req: true, type: 'text', label: 'Domain' }, v); /* help examples use this organization's own domain once it has a valid one */
+        const help = (tv && r.type === 'checks') || (tv && r.editHelp) ? '' : (tv && r.f === 'subdomain') ? '' : (r.help ? String(r.help).replace(/\{domain\}/g, domOk ? dom : 'school.edu') : '') || /* 'Select exactly 2 days' is an editing instruction */ (v6 && r.type === 'radio' ? optDesc : '') /* the chosen option's description shows under the title, in view and edit */ || (v6 && r.type === 'check' && !tv ? r.checkLabel : '') || '';
+        return { id, label: r.label, help, hasHelp: !!help, helpId: id + '-help', errId: id + '-err',
+          descBy: [help ? id + '-help' : '', err ? id + '-err' : ''].filter(Boolean).join(' '),
+          isLocked: t === 'fixed' && !tv, /* edit mode: a lock marks values Paradigm sets (rush orders) */ lockSr: r.lockSr || ', set by Paradigm, read-only',
+          isTextView: ((tv && t !== 'upload') || t === 'fixed') && !(tv && t === 'emails' && this.emailList(x).some(e => e.trim())), emailView: tv && t === 'emails' ? this.emailList(x).map(e => e.trim()).filter(Boolean) : [], display: t === 'fixed' ? (r.fixedFn ? r.fixedFn(all[secKey] || {}) : r.fixed) : shown(r, v), isSwitch: !tv && t === 'switch', isBadgeView: false, swText: x ? 'On' : 'Off', roAttr: 'false', onToggle: () => set(r.f, !x),
+          isText: !tv && t === 'text', inType: 'text', isDate: !tv && t === 'date', ...(!tv && t === 'date' ? this.dateVM(r, id, x, set) : { cal: { days: [], weekdays: [], months: [], years: [] } }),
+          isMoney: !tv && t === 'money', isArea: !tv && t === 'area', isSelect: !tv && t === 'select', isUpload: false,
+          isFiles: t === 'upload', filesEdit: t === 'upload' && !tv, files: t === 'upload' ? fileList(r, v).map((fl, k) => { const src = fl.src || (!fl.up ? (r.f === 'logos' ? (this.props.logoSrc || '') : r.f === 'diplomas' ? (k % 2 ? 'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20480%20620%22%3E%3Crect%20width=%22480%22%20height=%22620%22%20fill=%22%23fbf8f1%22/%3E%3Crect%20x=%2214%22%20y=%2214%22%20width=%22452%22%20height=%22592%22%20fill=%22none%22%20stroke=%22%23b9a676%22%20stroke-width=%226%22/%3E%3Crect%20x=%2228%22%20y=%2228%22%20width=%22424%22%20height=%22564%22%20fill=%22none%22%20stroke=%22%23d8cba6%22%20stroke-width=%222%22/%3E%3Crect%20x=%22144.0%22%20y=%2299.2%22%20width=%22192.0%22%20height=%2221.700000000000003%22%20fill=%22%237a6a45%22/%3E%3Crect%20x=%22105.6%22%20y=%22186.0%22%20width=%22268.8%22%20height=%2237.199999999999996%22%20fill=%22%232b2a28%22/%3E%3Crect%20x=%22153.6%22%20y=%22260.4%22%20width=%22172.79999999999998%22%20height=%2215.5%22%20fill=%22%238b8679%22/%3E%3Crect%20x=%22124.80000000000001%22%20y=%22297.59999999999997%22%20width=%22230.39999999999998%22%20height=%2215.5%22%20fill=%22%238b8679%22/%3E%3Crect%20x=%2267.2%22%20y=%22483.6%22%20width=%22105.6%22%20height=%223%22%20fill=%22%236b665c%22/%3E%3Crect%20x=%22307.2%22%20y=%22483.6%22%20width=%22105.6%22%20height=%223%22%20fill=%22%236b665c%22/%3E%3Ccircle%20cx=%22240.0%22%20cy=%22471.2%22%20r=%2238.4%22%20fill=%22%238c1d2c%22/%3E%3Ccircle%20cx=%22240.0%22%20cy=%22471.2%22%20r=%2226.4%22%20fill=%22none%22%20stroke=%22%23e7c873%22%20stroke-width=%223%22/%3E%3C/svg%3E' : 'data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20680%20480%22%3E%3Crect%20width=%22680%22%20height=%22480%22%20fill=%22%23fbf8f1%22/%3E%3Crect%20x=%2214%22%20y=%2214%22%20width=%22652%22%20height=%22452%22%20fill=%22none%22%20stroke=%22%23b9a676%22%20stroke-width=%226%22/%3E%3Crect%20x=%2228%22%20y=%2228%22%20width=%22624%22%20height=%22424%22%20fill=%22none%22%20stroke=%22%23d8cba6%22%20stroke-width=%222%22/%3E%3Crect%20x=%22204.0%22%20y=%2276.8%22%20width=%22272.0%22%20height=%2216.8%22%20fill=%22%237a6a45%22/%3E%3Crect%20x=%22149.6%22%20y=%22144.0%22%20width=%22380.8%22%20height=%2228.799999999999997%22%20fill=%22%232b2a28%22/%3E%3Crect%20x=%22217.6%22%20y=%22201.6%22%20width=%22244.79999999999998%22%20height=%2212.0%22%20fill=%22%238b8679%22/%3E%3Crect%20x=%22176.8%22%20y=%22230.39999999999998%22%20width=%22326.4%22%20height=%2212.0%22%20fill=%22%238b8679%22/%3E%3Crect%20x=%2295.2%22%20y=%22374.40000000000003%22%20width=%22149.6%22%20height=%223%22%20fill=%22%236b665c%22/%3E%3Crect%20x=%22435.2%22%20y=%22374.40000000000003%22%20width=%22149.6%22%20height=%223%22%20fill=%22%236b665c%22/%3E%3Ccircle%20cx=%22340.0%22%20cy=%22364.8%22%20r=%2238.4%22%20fill=%22%238c1d2c%22/%3E%3Ccircle%20cx=%22340.0%22%20cy=%22364.8%22%20r=%2226.4%22%20fill=%22none%22%20stroke=%22%23e7c873%22%20stroke-width=%223%22/%3E%3C/svg%3E') : '') : ''); /* sample diplomas: one landscape, one portrait */ return Object.assign({}, fl, { src, hasThumb: !!src, noThumb: !src, meta: fl.ext + ' · ' + (fl.size || (r.f === 'logos' ? '24 KB' : '310 KB')), short: fl.name, /* middle truncation keeps the end (-2.png) visible */ onRemove: () => setFiles(r, fileList(r, v).filter((_, j) => j !== k)) }); }) : [], noFiles: t === 'upload' && !fileList(r, v).length,
+          onFile: (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; const ext = (/\.(png|jpe?g)$/i.exec(f.name) || [])[1]; if (!ext) { this.setState({ fileErr: Object.assign({}, this.state.fileErr, { [r.f]: 'Upload a JPG or PNG file.' }) }); e.target.value = ''; return; } this.setState({ fileErr: Object.assign({}, this.state.fileErr, { [r.f]: '' }) }); const size = f.size < 1048576 ? Math.max(1, Math.round(f.size / 1024)) + ' KB' : (f.size / 1048576).toFixed(1) + ' MB'; const add = (src) => setFiles(r, fileList(r, v).concat([{ name: f.name, ext: /png/i.test(ext) ? 'PNG' : 'JPG', at: stamp(), up: true, size, src }])); if (f.size <= 500000 && window.FileReader) { const fr = new FileReader(); fr.onload = () => add(String(fr.result || '')); fr.onerror = () => add(''); fr.readAsDataURL(f); } else add(''); e.target.value = ''; },
+          isEmails: !tv && t === 'emails', emailItems: t === 'emails' && !tv ? (() => { const L = Array.isArray(v[r.f + 'List']) ? v[r.f + 'List'] : (this.emailList(x).length ? this.emailList(x) : ['']); const put = (arr) => this.setState({ draft: Object.assign({}, this.state.draft, { [r.f + 'List']: arr, [r.f]: arr.map(e => e.trim()).filter(Boolean).join('; ') }), saved: false }); return L.map((em, k) => ({ id: k ? id + '-' + k : id, value: em, aria: k ? r.label + ' ' + (k + 1) : r.label, canRemove: L.length > 1, rmLabel: 'Remove ' + (em.trim() || 'email ' + (k + 1)), bad: err && ((em.trim() && !/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(em.trim())) || !L.some(e => e.trim())) ? 'true' : 'false', onInput: (e) => { const a = L.slice(); a[k] = e.target.value; put(a); }, onRemove: () => { const a = L.filter((_, j) => j !== k); put(a.length ? a : ['']); setTimeout(() => { const el = document.getElementById(id); if (el) el.focus(); }, 30); } })); })() : [], canAddEmail: t === 'emails' && !tv && (Array.isArray(v[r.f + 'List']) ? v[r.f + 'List'] : this.emailList(x)).length < (r.max || 10), onAddEmail: () => { const L0 = Array.isArray(v[r.f + 'List']) ? v[r.f + 'List'] : (this.emailList(x).length ? this.emailList(x) : ['']); const a = L0.concat(['']); this.setState({ draft: Object.assign({}, this.state.draft, { [r.f + 'List']: a }), saved: false }); setTimeout(() => { const el = document.getElementById(id + '-' + (a.length - 1)); if (el) el.focus(); }, 30); },
+          dd: (!tv && t === 'select') ? this.ddVM(id, { id, label: r.label, value: x == null ? '' : x, placeholder: 'Select', invalid: !!err, options: (r.options || []).map(o => ({ value: o[0], label: o[1] })), onPick: (val) => set(r.f, val) }) : { options: [] },
+          isRadio: !tv && t === 'radio', isCheck: !tv && t === 'check', isChecks: !tv && t === 'checks',
+          value: t === 'upload' ? shown(r, v) : (x == null ? '' : x), ph: String(r.ph || '').replace('{org}', this.props.orgName || 'Albany Medical College'), checked: t === 'switch' ? String(!!x) : !!x, checkLabel: r.checkLabel || r.label, uploadLabel: r.uploadLabel || 'Upload',
+          options: (r.options || []).map(o => ({ value: o[0], label: o[1], desc: o[2] || '', hasDesc: !v6 && !!o[2], /* V6: the chosen option's description is the row's help text instead */ id: id + '-' + o[0], name: id, checked: t === 'checks' ? (x || []).indexOf(o[0]) > -1 : String(x) === String(o[0]),
+            onPick: () => set(r.f, o[0]),
+            /* Checkbox groups with a max (Twice a week = 2): once the max is checked, the rest are disabled */ dis: t === 'checks' && !!r.max && (x || []).length >= r.max && (x || []).indexOf(o[0]) < 0,
+            onToggle: (ev) => { const cur = (x || []).slice(); const k = cur.indexOf(o[0]); if (ev.target.checked && k < 0) { if (r.max && cur.length >= r.max) { ev.target.checked = false; return; } cur.push(o[0]); } if (!ev.target.checked && k > -1) cur.splice(k, 1); set(r.f, cur); } })),
+          onInput: (e) => set(r.f, e.target.value), onMoneyInput: (e) => { const c = this.moneyClean(e.target.value); if (c !== e.target.value) e.target.value = c; set(r.f, c); }, onMoneyBlur: (e) => { const f = this.moneyFmt(e.target.value); e.target.value = f; set(r.f, f); }, onCheck: (e) => set(r.f, e.target.checked), onUpload: () => set(r.f, (+(x || 0)) + 1),
+          invalid: (err || (t === 'date' && (st.dErr || {})[r.f])) ? 'true' : 'false', error: err || (t === 'upload' && (st.fileErr || {})[r.f]) || (t === 'date' && (st.dErr || {})[r.f]) || '', hasError: !!(err || (t === 'upload' && (st.fileErr || {})[r.f]) || (t === 'date' && (st.dErr || {})[r.f])), ...(() => { /* live count, shown within 20 of the limit; typing is never blocked */ if (!r.max || tv || t !== 'text') return { hasCount: false }; const n = String(x == null ? '' : x).length; const over = n - r.max; return { hasCount: !err && n >= r.max - 20, countText: over > 0 ? over + (over === 1 ? ' character' : ' characters') + ' too many' : n + '/' + r.max, countCls: over > 0 ? 'cc-hint--error' : '', countSr: over > 0 ? over + ' characters too many' : (r.max - n) + ' characters remaining' }; })(), ctlCls: '', optShow: !!r.opt && !tv, radioCls: (t === 'radio' && (r.options || []).length <= 3) ? 'v6-radio-inline' : '', /* 2–3 choices sit side by side (they wrap if they don't fit) */ fcShow: t === 'upload' && fileList(r, v).length > 0, fcNum: t === 'upload' ? fileList(r, v).length : 0, fcSr: t === 'upload' ? fileList(r, v).length + ' uploaded' : '', /* file count beside the label */ tipCls: this.state.tipOff === secKey + ':' + r.f ? 'is-off' : '', onTipKey: (e) => { if (e.key === 'Escape') this.setState({ tipOff: secKey + ':' + r.f }); }, onTipBlur: () => { if (this.state.tipOff) this.setState({ tipOff: '' }); }, /* optional fields are marked while editing; required fields are the default */ upCtl: t === 'upload' && !tv && !v6, upText: t === 'upload' && !tv && v6 && !this.upLocked(secKey, all, v), upLock: t === 'upload' && !tv && v6 && this.upLocked(secKey, all, v), upLockText: (secKey === 'reorder' ? 'Enter a valid domain to upload ' : 'Save a domain to upload ') + r.label.toLowerCase() + '. They are stored in a folder named after it.', rowCls: (v6 && (t === 'area' || t === 'upload') ? 'v6-stack' : '') + (v6 && t === 'upload' ? ' v6-uprow' : '') + (v6 && !r.wide && t !== 'area' && t !== 'upload' ? ' v6-mid' : '') + (v6 && ((!tv && ((t === 'radio' && (r.options || []).length > 3) || t === 'checks' || t === 'emails')) || (tv && t === 'emails' && this.emailList(x).filter(e => String(e).trim()).length > 1)) ? ' v6-list' : '') /* lists keep the title at the top */ + (v6 && r.wide ? ' v6-wide' : '') /* wide rows (Display name) use the wide column in view and edit, so the saved name sits where the field appears and long names don't wrap early */ };
+      });
+      /* V6/V7: on/off options that depend on the section (Lost & Damaged) sit in the Status group under the main switch, not at the bottom. */
+      const stG = groups[0] && groups[0].title === 'Status' ? groups[0] : null;
+      if (v6 && g.statusRow && stG) { g.rows.filter(r => this.vis(r, v)).forEach((r, k) => { const row = rows[k]; const on = !!v[r.f]; Object.assign(row, { label: r.statusLabel || row.label, help: r.f === 'ld' ? 'Reports become paper replacement orders automatically.' /* the label says what is reported; the help says what happens (AC 3.3) */ : (r.checkLabel || row.help), hasHelp: true, isTextView: false, isBadgeView: !st.editing, display: on ? 'On' : 'Off', badgeCls: on ? 'cc-badge--success' : '', isSwitch: !!st.editing, checked: String(on), swText: on ? 'On' : 'Off' }); stG.rows.push(row); }); return; }
+      groups.push({ title: g.title, mutedCls: '', isCerts: false, rows, certRows: [] });
+    });
+    // Dot only: green = On, gray = Off, ringed dot = Needs setup (differs by shape too, WCAG 1.4.1).
+    const dot = (s) => ({ dotBg: s === 'done' ? 'var(--success-600)' : s === 'todo' ? 'radial-gradient(circle, var(--warning-700) 0 2px, var(--bg-primary) 2.5px)' : 'var(--gray-400)', dotBd: s === 'done' ? 'var(--success-600)' : s === 'todo' ? 'var(--warning-700)' : 'var(--gray-400)', dotSz: s === 'todo' ? '10px' : '8px', dotM: s === 'todo' ? '-1px' : '0', dotR: '9999px', dotT: 'none' });
+    const sec0 = statuses[def.key];
+    return {
+      orgName: this.props.orgName ?? 'Albany Medical College', standalone: !emb, outerPad: emb ? '0' : 'var(--space-8) var(--space-8) var(--space-12)', maxW: emb ? 'none' : '1280px', introMt: emb ? '0' : 'var(--space-6)',
+      pageTabs: ['Details', 'Shipping', 'Billing', 'Contacts', 'Punctuation Data', 'Settings'].map(l => ({ label: l, pressed: String(l === 'Settings') })),
+      summary: doneN + ' on · ' + offN + ' off' + (todoN ? ' · ' + todoN + ' need setup' : ''), sumFg: todoN ? 'var(--warning-700)' : 'var(--gray-700)',
+      nav: defs.map(d => { const s = statuses[d.key]; const cur = d.key === secKey; return Object.assign(dot(s), { label: d.label, stLabel: lbl(s, d.key), stFg: s === 'todo' ? 'var(--warning-700)' : 'var(--gray-600)', cur: cur ? 'page' : 'false', bg: cur ? 'var(--gray-100)' : 'transparent', fg: cur ? 'var(--gray-900)' : 'var(--gray-700)', weight: cur ? 'var(--fw-semibold)' : 'var(--fw-medium)',
+        onOpen: (e) => { if (e && e.preventDefault) e.preventDefault(); go(() => this.setState(Object.assign({ sec: d.key }, reset))); } }); }),
+      rootCls: 'v3s' + (lin ? ' v5l' : '') + (v6 ? ' v6' : '') + (v7 ? ' v7' : '') + (v8 ? ' v8' : '') + (st.editing ? ' v3-editing' : ''), showPageHead: lin && !cards, secH3: lin && !cards, secH2: !(lin && !cards), contentMax: v8 ? '760px' : v6 ? '880px' : '900px', gridCols: cards ? 'minmax(0, 1fr)' : '220px minmax(0, 1fr)', showIntroRow: !cards && !lin, gridMt: cards ? '0' : 'var(--space-6)', showRail: !cards, showCards: home, showDetail: !home, showBack: cards && !home,
+      onBack: () => go(() => this.setState(Object.assign({ cardSec: null }, reset))),
+      cards: defs.map(d => { const s = statuses[d.key]; const vv = all[d.key] || {};
+        const missing = d.groups.reduce((m, g) => m.concat(g.rows.filter(r => this.rowErr(r, vv)).map(r => r.label)), []);
+        const filled = d.groups.reduce((m, g) => m.concat(g.rows.filter(r => this.vis(r, vv) && ['text', 'money', 'radio', 'select'].indexOf(r.type) > -1 && String(vv[r.f] || '').trim()).map(r => shown(r, vv))), []);
+        const sum = s === 'off' ? 'Not in use for this organization.' : missing.length ? 'Needs ' + missing.join(', ') : (filled.slice(0, 3).join(' · ') || d.desc);
+        return { isOn: s === 'done', isOff: s === 'off', isTodo: s === 'todo', cardCls: s === 'todo' ? 'v5-card--todo' : '',
+          indBg: s === 'done' ? 'var(--success-50)' : s === 'todo' ? 'var(--warning-50)' : 'var(--gray-50)', indBd: s === 'done' ? 'var(--success-200)' : s === 'todo' ? 'var(--warning-300)' : 'var(--gray-300)', indFg: s === 'done' ? 'var(--success-700)' : s === 'todo' ? 'var(--warning-700)' : 'var(--gray-600)',
+          badgeCls: s === 'done' ? 'cc-badge--success' : s === 'todo' ? 'cc-badge--warning' : '', cta: s === 'todo' ? 'Set up' : s === 'off' ? 'View' : 'View',
+          label: d.label, sum, stLabel: lbl(s, d.key), stFg: s === 'todo' ? 'var(--warning-700)' : s === 'off' ? 'var(--gray-500)' : 'var(--gray-700)', onOpen: () => this.setState(Object.assign({ cardSec: d.key }, reset)) }; }),
+      leaveOpen: !!st.leaveFn, onStay: () => this.setState({ leaveFn: null }), onLeave: () => { const fn = st.leaveFn; this.setState({ leaveFn: null }); if (fn) fn(); },
+      onSaveLeave: () => { const fn = st.leaveFn; const d = st.draft || {}; const off = def.toggle && !d.on; if (!off && this.sectionErrs(def, d) > 0) { this.setState({ leaveFn: null, tried: true, certQ: '', certF: '' }); return; } if (typeof this.props.onSave === 'function') { this.props.onSave(secKey, d); this.setState({ leaveFn: null, editing: false, draft: null, tried: false, saved: true }); } else { this.setState({ leaveFn: null, data: Object.assign({}, st.data, { [secKey]: d }), editing: false, draft: null, tried: false, saved: true }); } if (fn) setTimeout(fn, 0); },
+      showSecIcon: v6, ic: { [def.key]: true },
+      sec: { label: def.label, desc: def.desc, showSwitch: false, showBadge: !(v6 && (def.toggle || def.setupStatus)), checked: String(!!v.on), swText: v.on ? 'On' : 'Off', swHelp: def.toggle || '', onToggle: () => set('on', !v.on), stLabel: lbl(sec0, def.key), badgeCls: sec0 === 'done' ? 'cc-badge--success' : sec0 === 'todo' ? 'cc-badge--warning' : '' },
+      /* 'Daily (Monday–Friday)': the part in parentheses shows as a smaller, lighter detail */
+      groups: groups.map(g => Object.assign({}, g, (() => { /* view mode: the full site address sits quietly beside the group title that holds Domain and Subdomain */ const has = !st.editing && (g.rows || []).some(r => /-domain$/.test(r.id || '')); const d0 = String(v.domain || '').trim(); const s0 = String(v.subdomain || '').trim(); const ok = has && d0 && !this.rowErr({ f: 'domain', req: true, type: 'text', label: 'Domain' }, v); const sa = ok ? (s0 && !this.rowErr({ f: 'subdomain', type: 'text', label: 'Subdomain' }, v) ? s0 + '.' + d0 : d0) : ''; return { siteAddr: sa, hasSite: !!sa }; })(), { rows: (g.rows || []).map(r => { const m = /^(.+?)\s*\(([^()]+)\)$/.exec(String(r.display == null ? '' : r.display)); const o = Object.assign({}, r, { errInline: !!(r.hasError && r.isEmails), errBelow: !!(r.hasError && !r.isEmails), dMain: m ? m[1] : r.display, dSub: m ? m[2] : '', hasDSub: !!m }); /* view mode emails: mailto link + copy button, same as the organization Details tab */ const EV = r.emailView || []; o.isEmailView = EV.length > 0; o.emailCopiedMsg = EV.some((e, i) => st.copied === r.id + ':' + i) ? 'Copied to clipboard' : ''; o.emailLinks = EV.map((e, i) => { const k = r.id + ':' + i; const c = st.copied === k; return { addr: e, href: 'mailto:' + e, copied: c, notCopied: !c, copyTitle: c ? 'Copied' : 'Copy', copyLabel: 'Copy ' + e, onCopy: () => { try { navigator.clipboard && navigator.clipboard.writeText(e); } catch (er) {} this.setState({ copied: k }); clearTimeout(this._copyT); this._copyT = setTimeout(() => this.setState({ copied: '' }), 2000); } }; }); if (r.id === 'v2-display-name' && r.isTextView && !String(r.display || '').replace(/—/g, '').trim()) Object.assign(o, { isTextView: false, isBadgeView: true, display: 'Not set up', badgeCls: 'cc-badge--warning' }); return o; }) })), cq, viewing: !st.editing && canEdit, editing: st.editing,
+      hasSaved: st.saved && !st.editing && typeof this.props.onSave !== 'function', /* in the platform the host shows its success toast */ hasErrors: false, /* no summary line: each field shows its own red message, and focus moves to the first one */
+      editable: !blocked,
+      onEdit: () => this.setState({ editing: true, draft: Object.assign({}, all[secKey] || {}), tried: false, saved: false, fileErr: null, certSel: [], certBdOpen: false, certBd: '' }),
+      onCancel: () => this.setState({ editing: false, draft: null, tried: false, fileErr: null }),
+      onSave: () => {
+        const d = st.draft; const off = def.toggle && !d.on;
+        const bad = !off && this.sectionErrs(def, d) > 0;
+        if (bad) { this.setState({ tried: true, certQ: '', certF: '' }); setTimeout(() => { const el = document.querySelector('.v3s [aria-invalid="true"]'); if (el) el.focus(); }, 60); return; } // clear cert filters so every error is visible
+        if (typeof this.props.onSave === 'function') { this.props.onSave(secKey, d); this.setState({ editing: false, draft: null, tried: false, saved: true }); return; }
+        this.setState({ data: Object.assign({}, st.data, { [secKey]: d }), editing: false, draft: null, tried: false, saved: true });
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

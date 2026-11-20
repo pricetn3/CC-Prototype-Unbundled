@@ -1,4 +1,10 @@
-/* Left navigation: 270px open, 64px collapsed (collapses on its own at 1280px wide or less).
+/* PROTOTYPE ONLY: REMOVE IN PRODUCTION.
+   This rail lets reviewers jump between every screen in one place. The real product won't work
+   this way: internal staff and external (client) users sign in to different accounts, and each
+   user profile's permissions decide which screens it can reach. Build navigation per role
+   instead of copying this all-screens rail.
+
+   Left navigation: 270px open, 64px collapsed (collapses on its own at 1280px wide or less).
    Main nav, org search, the product selector and the product's sub-nav (Orders, Signatures, Documents). */
 
 import { useCallback, useEffect, useRef, useState, type FocusEvent } from 'react';
@@ -216,6 +222,14 @@ export function Sidebar() {
       )}
 
       <div className={styles.spacer} />
+      {collapsed
+        ? <div className={styles.protoSlim} title="Prototype navigation. To be removed in development." aria-label="Prototype navigation. To be removed in development." role="note">Proto</div>
+        : (
+          <div className={styles.protoNote} role="note">
+            <strong>Prototype navigation</strong>
+            <span>To be removed in development. Real users sign in to an internal or external account, and their permissions set what they can reach.</span>
+          </div>
+        )}
       <div className={styles.foot}>
         <img src={paradigmGray} alt="Paradigm" className={collapsed ? styles.footLogoSlim : styles.footLogo} />
       </div>

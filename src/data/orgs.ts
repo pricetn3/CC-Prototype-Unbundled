@@ -191,7 +191,7 @@ const SECTIONS: [key: string, label: string][] = [
   ['hold', 'Hold Management'],
   ['display', 'Paper Authentication'],
   ['reorder', 'Reorder Management'],
-  ['store', 'Student Store'],
+  ['store', 'Paper Credentials'],
 ];
 
 /** American International College (1450) is a digital-only client, so it has no Paper Authentication section. */

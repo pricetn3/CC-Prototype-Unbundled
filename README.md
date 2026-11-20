@@ -37,3 +37,37 @@ Everything aims at WCAG 2.2 AA, the design system's standard.
 - **Claude Design canvas:** after changing the prototype, open Claude Code in this repo and say **"sync from design"**. The `sync-design` skill (`.claude/skills/sync-design/`) compares the canvas with `design/snapshot/`, ports what changed, checks it in the browser and commits it to a branch.
 
 `design/design-sync.json` records which canvas version was last synced and which screens are built.
+
+## Links for user stories
+
+Each story can link three things: the prototype deep link (Claude Design), the screen in this app, and the code file below. Code links point at the latest `main`. To pin a story to the code as it is today, open the file on GitHub and press `y`; the address changes to a fixed commit link.
+
+Run the app with `npm run dev`, then add the path to `http://localhost:5173`.
+
+| Screen | Path in the app | Code |
+| --- | --- | --- |
+| App shell (top bar, layout) | all screens | [AppShell.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/AppShell.tsx), [TopBar.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/TopBar.tsx) |
+| Side rail (prototype only, to be removed) | all screens | [Sidebar.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/Sidebar.tsx) |
+| Home | `/` | [Home.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Home.tsx) |
+| Organizations | `/organizations` | [Organizations.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Organizations.tsx) |
+| Add organization | `/organizations/new` | [AddOrganization.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/AddOrganization.tsx) |
+| Org profile, Details | `/organizations/:num` | [OrgProfile.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/OrgProfile.tsx) |
+| Org profile, other tabs | `/organizations/:num?tab=shipping`, `billing`, `contacts`, `punctuation`, `settings` | [org-profile/](https://github.com/pricetn3/CC-Prototype-Unbundled/tree/main/src/pages/org-profile) |
+| Org profile, one settings section | `/organizations/:num?tab=settings&section=` `batching`, `digital`, `hold`, `lost-damaged`, `paper-authentication`, `reorder` or `paper` | [SettingsTab.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/org-profile/SettingsTab.tsx) |
+| Admin, Countries | `/admin` | [Admin.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Admin.tsx), [AdminCountries.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/AdminCountries.tsx) |
+| Admin, Action log | `/admin?tab=action-log` | [AdminActionLog.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/AdminActionLog.tsx) |
+| Users | `/users` | [Users.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Users.tsx) |
+| Invite user | `/users/invite` | [UsersDialogs.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/components/UsersDialogs.tsx) |
+| Edit user | `/users/:userId?edit=1` | [Users.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Users.tsx) |
+| Profile | `/profile` | [Profile.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Profile.tsx) |
+| Reports | `/reports` | [Reports.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Reports.tsx) |
+| Orders | `/orders`, one order: `/orders?order=<id>` | [Orders.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Orders.tsx) |
+| Place order | `/orders/new` | [PlaceOrder.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/PlaceOrder.tsx) |
+| Credentials | `/orders/credentials?tab=paper` or `digital` | [Credentials.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Credentials.tsx) |
+| Reorder management | `/orders/reorders` | [Reorders.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Reorders.tsx) |
+| Hold management | `/orders/holds` | [Holds.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Holds.tsx) |
+| Signatures | `/signatures` | [Signatures.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Signatures.tsx) |
+| Documents | `/documents` | [Documents.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Documents.tsx) |
+| Support | `/support` | [Support.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Support.tsx) |
+| Shared components | | [components/](https://github.com/pricetn3/CC-Prototype-Unbundled/tree/main/src/components) |
+| Sample data | | [data/](https://github.com/pricetn3/CC-Prototype-Unbundled/tree/main/src/data) |

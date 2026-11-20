@@ -5852,7 +5852,7 @@ class Component extends DCLogic {
 
   /* ---------- icons ---------- */
   // ---- Shareable links: the address carries page, org, tab, section, view filter and edit mode ----
-  ccLinkMaps() { return { tabs: { settings: 'setup' }, secs: { 'display-name': 'display', digital: 'ced', store: 'store', reorder: 'reorder', hold: 'hold', batching: 'batch', integrations: 'myhub' } }; }
+  ccLinkMaps() { return { tabs: { settings: 'setup' }, secs: { 'display-name': 'display', digital: 'ced', store: 'store', paper: 'store', 'lost-damaged': 'ld', reorder: 'reorder', hold: 'hold', batching: 'batch', integrations: 'myhub' } }; }
   ccLinkQuery() {
     const s = this.state; if (s.signedOut) return '';
     const M = this.ccLinkMaps(); const rev = (m, v) => Object.keys(m).find(k => m[k] === v) || v;
@@ -5913,7 +5913,7 @@ class Component extends DCLogic {
     const demo = g('demo');
     if (h.screen === 'org' && demo) setTimeout(() => {
       const o = this.selected(); if (!o) return; const sec = this.state.setSec || 'ced';
-      const label = { ced: 'Digital credentials', store: 'Student Store', reorder: 'Reorder Management', hold: 'Hold Management', batch: 'API order batching', display: 'Display name', myhub: 'Integrations' }[sec] || 'Settings';
+      const label = { ced: 'Digital credentials', store: 'Paper credentials', ld: 'Lost & Damaged', reorder: 'Reorder Management', hold: 'Hold Management', batch: 'API order batching', display: 'Display name', myhub: 'Integrations' }[sec] || 'Settings';
       if (demo === 'saved') { const sd = this.implSecDefsRaw().find(x => x[0] === sec); this.setState({ setEd: null, toast: { title: 'Successfully updated ' + (sd ? sd[1] : 'organization settings'), sub: 'Your changes have been saved.', icon: 'check-circle-2', actionLabel: '', actionLabel2: '' } }); return; }
       if (!this.state.setEd) this.ccLinkEdit();
       setTimeout(() => {
@@ -8785,7 +8785,7 @@ class Component extends DCLogic {
     }
     return out;
   }
-  orgProfileVM(st) { /* Settings lists on Details follow the Settings tab's alphabetical order */ const out = this.orgProfileVMRaw(st); try { const nm = (x) => x && typeof x === 'object' ? String(x.label || x.name || x.title || '') : ''; const isSec = (a) => Array.isArray(a) && a.length > 2 && a.some(x => /API Order Batching/.test(nm(x))) && a.some(x => /Student Store/.test(nm(x))); const walk = (o, d) => { if (!o || typeof o !== 'object' || d > 3) return; Object.keys(o).forEach(k => { const val = o[k]; if (isSec(val)) o[k] = val.slice().sort((a, b) => nm(a).localeCompare(nm(b))); else if (val && typeof val === 'object' && !Array.isArray(val)) walk(val, d + 1); }); }; walk(out, 0); /* Status dots match the Settings side rail: green-600 = On / Set up, gray-400 = Off, ringed yellow = Needs setup */ const dotOf = (d) => { const s = String(d || ''); return /success/.test(s) ? 'var(--success-600)' : /warning/.test(s) ? 'radial-gradient(circle, var(--warning-700) 0 1.6px, var(--bg-primary) 1.6px 2.6px, var(--warning-700) 2.6px)' : 'var(--gray-400)'; }; if (out && out.opSum && Array.isArray(out.opSum.rows)) out.opSum.rows = out.opSum.rows.map(r => r && r.dot !== undefined ? Object.assign({}, r, { dot: dotOf(r.dot) }) : r); } catch (e) {} return out; }
+  orgProfileVM(st) { /* Settings lists on Details follow the Settings tab's alphabetical order */ const out = this.orgProfileVMRaw(st); try { const nm = (x) => x && typeof x === 'object' ? String(x.label || x.name || x.title || '') : ''; const isSec = (a) => Array.isArray(a) && a.length > 2 && a.some(x => /API Order Batching/.test(nm(x))) && a.some(x => /Student Store|Paper credentials/i.test(nm(x))); const walk = (o, d) => { if (!o || typeof o !== 'object' || d > 3) return; Object.keys(o).forEach(k => { const val = o[k]; if (isSec(val)) o[k] = val.slice().sort((a, b) => nm(a).localeCompare(nm(b))); else if (val && typeof val === 'object' && !Array.isArray(val)) walk(val, d + 1); }); }; walk(out, 0); /* Status dots match the Settings side rail: green-600 = On / Set up, gray-400 = Off, ringed yellow = Needs setup */ const dotOf = (d) => { const s = String(d || ''); return /success/.test(s) ? 'var(--success-600)' : /warning/.test(s) ? 'radial-gradient(circle, var(--warning-700) 0 1.6px, var(--bg-primary) 1.6px 2.6px, var(--warning-700) 2.6px)' : 'var(--gray-400)'; }; if (out && out.opSum && Array.isArray(out.opSum.rows)) out.opSum.rows = out.opSum.rows.map(r => r && r.dot !== undefined ? Object.assign({}, r, { dot: dotOf(r.dot) }) : r); } catch (e) {} return out; }
   orgProfileVMRaw(st) {
     if (st.screen !== 'org') return { opSum: { rows: [] }, opHasLogo: false, opNoLogo: true, opV: {}, opContacts: [], opCtOpen: false, opCt: {}, opPunct: [], opDeOpen: false, opDe: {}, opLgOpen: false, opLg: {} };
     const o = this.selected(); const inactive = o.status === 'inactive';
@@ -9419,7 +9419,7 @@ class Component extends DCLogic {
     return [
       ['display', 'Paper Authentication', 'The institution display name shown on the Paper Authentication Page.'],
       ['ced', 'Digital Credentials', 'CeD/CeC purchase option, authentication, pricing and domain.'],
-      ['store', 'Student Store', 'Paper ordering, pricing, cert type packaging and Lost & Damaged.'],
+      ['store', 'Paper Credentials', 'Paper ordering in the Student Store, pricing and cert type packaging.'],
       ['reorder', 'Reorder Management', 'Student reorder site domain and images.'],
       ['hold', 'Hold Management', 'Hold batching frequency and notification email.'],
       ['batch', 'API Order Batching', 'When API orders are batched for this organization.'],
@@ -9495,6 +9495,7 @@ class Component extends DCLogic {
         display: { name: (g(d.display).name) || org.displayName || '', on: g(d.display).on !== undefined ? !!g(d.display).on : !!((g(d.display).name) || org.displayName) },
         ced: Object.assign({}, ced, { on: ced.on !== undefined ? !!ced.on : !!ced.purchase, emailAuth: !!g(org.setup).emailAuth || !!ced.emailAuth }),
         store: Object.assign({}, store, { on: !!store.on, certs: (store.certs || []).map(c => Object.assign({}, c)) }),
+        ld: Object.assign({ on: !!store.ld, report: !!store.ld && !!store.on }, g(d.ld)), /* Lost & Damaged is its own section; older data kept it on the store */
         reorder: Object.assign({}, reorder, { on: !!g(org.setup).reorders }),
         hold: Object.assign({}, hold, { on: !!g(org.setup).holds, twice: (hold.twice || []).slice() }),
         batch: Object.assign({}, batch, { on: batch.on !== undefined ? !!batch.on : !!batch.freq, twice: Array.isArray(batch.twice) ? batch.twice.slice() : [] }),
@@ -9508,6 +9509,7 @@ class Component extends DCLogic {
           const rest = Object.assign({}, v); delete rest.on;
           if (sec === 'ced') { m('ced', Object.assign(rest, { on: !!v.on })); if (x) x.setup = Object.assign({}, x.setup, { emailAuth: !!v.emailAuth }); }
           if (sec === 'store') m('store', Object.assign(rest, { on: !!v.on }));
+          if (sec === 'ld') { m('ld', { on: !!v.on, report: !!v.report }); m('store', { ld: !!v.on }); }
           if (sec === 'reorder') { m('reorder', rest); if (x) x.setup = Object.assign({}, x.setup, { reorders: !!v.on }); }
           if (sec === 'hold') { m('hold', rest); if (x) x.setup = Object.assign({}, x.setup, { holds: !!v.on }); }
           if (sec === 'batch') m('batch', Object.assign(rest, { on: !!v.on }));
@@ -9516,7 +9518,7 @@ class Component extends DCLogic {
         });
         // Same success message as the rest of the platform
         const df = this.implSecDefs().find(x => x[0] === sec);
-        this.toast('Successfully updated ' + (df ? df[1] : 'organization settings'), 'Your changes have been saved.'); /* platform pattern: Successfully + verb + noun, naming the section that was saved */
+        this.toast('Successfully updated ' + (df ? df[1] : sec === 'ld' ? 'Lost & Damaged' : 'organization settings'), 'Your changes have been saved.'); /* platform pattern: Successfully + verb + noun, naming the section that was saved */
       },
     };
   }
@@ -10665,7 +10667,7 @@ class Component extends DCLogic {
     return m[s] || m.pending;
   }
 
-  renderVals() { const o = this.renderValsRaw(); try { const L = o && o.railSetup && o.railSetup.layout; if (Array.isArray(L) && !L.some(x => x && x.k === '7')) { const i6 = L.findIndex(x => x && x.k === '6'); if (i6 > -1) { const e6 = L[i6]; const cur = this.suV3On() ? this.suVar() : ''; L[i6] = Object.assign({}, e6, { on: !!e6.on && cur === 'v6' }); L.push(Object.assign({}, e6, { k: '7', label: String(e6.label || '').replace('6', '7'), on: cur === 'v7', onPick: () => this.suV3Set(true, 'v7') })); L.push(Object.assign({}, e6, { k: '8', label: String(e6.label || '').replace('6', '8'), on: cur === 'v8', onPick: () => this.suV3Set(true, 'v8') })); } } } catch (e) {} try { const nm = (x) => x && typeof x === 'object' ? String(x.label || x.name || x.title || '') : ''; const isSec = (a) => Array.isArray(a) && a.length > 2 && a.some(x => /API Order Batching/.test(nm(x))) && a.some(x => /Student Store/.test(nm(x))); const walk = (q, d) => { if (!q || typeof q !== 'object' || d > 3) return; Object.keys(q).forEach(k => { const val = q[k]; if (isSec(val)) q[k] = val.slice().sort((a, b) => nm(a).localeCompare(nm(b))); else if (val && typeof val === 'object' && !Array.isArray(val)) walk(val, d + 1); }); }; walk(o, 0); } catch (e) {} return o; }
+  renderVals() { const o = this.renderValsRaw(); try { const L = o && o.railSetup && o.railSetup.layout; if (Array.isArray(L) && !L.some(x => x && x.k === '7')) { const i6 = L.findIndex(x => x && x.k === '6'); if (i6 > -1) { const e6 = L[i6]; const cur = this.suV3On() ? this.suVar() : ''; L[i6] = Object.assign({}, e6, { on: !!e6.on && cur === 'v6' }); L.push(Object.assign({}, e6, { k: '7', label: String(e6.label || '').replace('6', '7'), on: cur === 'v7', onPick: () => this.suV3Set(true, 'v7') })); L.push(Object.assign({}, e6, { k: '8', label: String(e6.label || '').replace('6', '8'), on: cur === 'v8', onPick: () => this.suV3Set(true, 'v8') })); } } } catch (e) {} try { const nm = (x) => x && typeof x === 'object' ? String(x.label || x.name || x.title || '') : ''; const isSec = (a) => Array.isArray(a) && a.length > 2 && a.some(x => /API Order Batching/.test(nm(x))) && a.some(x => /Student Store|Paper credentials/i.test(nm(x))); const walk = (q, d) => { if (!q || typeof q !== 'object' || d > 3) return; Object.keys(q).forEach(k => { const val = q[k]; if (isSec(val)) q[k] = val.slice().sort((a, b) => nm(a).localeCompare(nm(b))); else if (val && typeof val === 'object' && !Array.isArray(val)) walk(val, d + 1); }); }; walk(o, 0); } catch (e) {} return o; }
   renderValsRaw() {
     this._perm = this.permEff(); this.permApplyDom(this._perm);
     const st = this.state;

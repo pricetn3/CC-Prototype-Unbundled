@@ -2,7 +2,8 @@
    their status, and one section at a time in view or edit mode. Saving appends Admin › Action log entries. */
 
 import { useState, type ReactNode } from 'react';
-import { CalendarClock, FileCheck2, FileText, PauseCircle, RefreshCw, ShoppingBag } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { CalendarClock, FileText, FileX2, Monitor, PauseCircle, RefreshCw, ShoppingBag } from 'lucide-react';
 import type { Org } from '../../data/orgs';
 import { CURRENT_USER, useStore } from '../../data/store';
 import { logEntry, type LogEntry } from '../../data/actionLog';
@@ -11,7 +12,7 @@ import { useToast } from '../../components/Toast';
 import s from './OrgTabs.module.css';
 import st from './SettingsTab.module.css';
 
-type SecKey = 'batch' | 'ced' | 'hold' | 'display' | 'reorder' | 'store';
+type SecKey = 'batch' | 'ced' | 'hold' | 'ld' | 'display' | 'reorder' | 'store';
 type Vals = Record<string, unknown>;
 type Opt = [string, string, string?];
 
@@ -21,7 +22,7 @@ interface Row {
   uploadLabel?: string; max?: number; fixed?: string; when?: (v: Vals) => boolean;
 }
 interface Group { title: string; rows: Row[]; certs?: boolean }
-interface SecDef { key: SecKey; label: string; desc: string; toggle?: string; groups: Group[]; icon: typeof FileText }
+interface SecDef { key: SecKey; label: string; desc: string; toggle?: string; paper?: boolean; groups: Group[]; icon: typeof FileText }
 
 const HD: Opt[] = [['Mon', 'Monday'], ['Tue', 'Tuesday'], ['Wed', 'Wednesday'], ['Thu', 'Thursday'], ['Fri', 'Friday']];
 const ord = (n: number) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
@@ -39,7 +40,7 @@ const DEFS: SecDef[] = [
   { key: 'batch', icon: CalendarClock, label: 'API order batching', desc: 'When API orders are batched for this organization. Universal API batches run at 1:00 PM ET, for both standard and rush orders.', toggle: 'Batches this organization\'s API orders on a schedule.', groups: [
     { title: 'Standard orders', rows: sched(undefined, 'Runs on this date, including weekends.') },
     { title: 'Rush orders', rows: [{ f: '_rush', label: 'Batch frequency', help: '5-day, 3-day and 1-day orders. Set by Paradigm.', type: 'fixed', fixed: 'Daily (Monday–Friday)' }] }] },
-  { key: 'ced', icon: FileCheck2, label: 'Digital credentials', desc: 'CeD/CeC purchase option, authentication, pricing and domain.', toggle: 'Offers digital diplomas and certificates (CeD/CeC).', groups: [
+  { key: 'ced', icon: Monitor, label: 'Digital credentials', desc: 'CeD/CeC purchase option, authentication, pricing and domain.', toggle: 'Offers digital diplomas and certificates (CeD/CeC).', groups: [
     { title: 'Digital pricing', rows: [
       { f: 'purchase', label: 'Purchase option', type: 'radio', req: true, options: [['student', 'Student purchase', 'Students buy their own CeD/CeC at the student purchase price.'], ['buyall', 'Buy all', 'The institution buys every credential. Students aren’t charged.']] },
       { f: 'price', label: 'Student purchase price', help: 'What students pay for each digital credential in the Student Store.', type: 'money', req: true, ph: '14.95', when: (v) => v.purchase === 'student' }] },
@@ -49,7 +50,7 @@ const DEFS: SecDef[] = [
       { f: 'subdomain', label: 'Subdomain', opt: true, help: 'Only the part before the domain. For sub.school.edu, enter sub.', type: 'text', ph: 'credentials' }] },
     { title: 'Program', rows: [
       { f: 'start', label: 'Start date', type: 'date' },
-      { f: 'cedOnly', label: 'CeD/CeC only', type: 'check', checkLabel: 'Orders digital credentials only, no paper products.' },
+      { f: 'cedOnly', label: 'CeD/CeC only', help: 'Paper Credentials and Lost & Damaged stay off.', type: 'check', checkLabel: 'This organization has no paper products.' },
       { f: 'page2', label: 'Separate page 2 for CeC', type: 'check', checkLabel: 'The CeC includes a separate second page.' },
       { f: 'legacy', label: 'Legacy CeD', help: 'For credentials with a conferral date before the start date.', type: 'check', checkLabel: 'Legacy CeD' }] },
     { title: 'Tracking', rows: [
@@ -61,6 +62,11 @@ const DEFS: SecDef[] = [
   { key: 'hold', icon: PauseCircle, label: 'Hold Management', desc: 'Hold batching frequency and notification email.', toggle: 'Batches orders on hold on a schedule.', groups: [
     { title: 'Schedule', rows: sched('Batched only when 6 or more documents are on hold. Otherwise they wait for the next batch date.', 'Batching is due on this date, including weekends and holidays.') },
     { title: 'Notifications', rows: [{ f: 'emails', label: 'Email', help: 'Receives batch order notifications and alerts when records on hold are expiring soon.', type: 'email', req: true, ph: 'name@school.edu' }] }] },
+  // Its own section: a school can offer replacements without paper ordering in the store (students then contact the school).
+  { key: 'ld', icon: FileX2, paper: true, label: 'Lost & Damaged', desc: 'Replacements for lost or damaged paper credentials.', toggle: 'Offers replacements for lost or damaged paper credentials.', groups: [
+    { title: 'Student Store', rows: [
+      { f: 'report', label: 'Student reporting', help: 'Reports become paper replacement orders automatically.', type: 'check', checkLabel: 'Students can report lost or damaged credentials in the Student Store.', when: (v) => !!v._paperOn },
+      { f: '_report', label: 'Student reporting', help: 'Students contact the organization to request a replacement. Turn on Paper Credentials to let them report in the Student Store.', type: 'fixed', fixed: 'Off', when: (v) => !v._paperOn }] }] },
   { key: 'display', icon: FileText, label: 'Paper authentication', desc: 'The organization display name shown on the Paper Authentication Page.', groups: [
     { title: 'Organization', rows: [{ f: 'name', label: 'Display name', type: 'text', req: true, max: 256, ph: 'e.g. Organization name' }] }] },
   { key: 'reorder', icon: RefreshCw, label: 'Reorder Management', desc: 'Student reorder site domain and images.', toggle: 'Lets students request reorders.', groups: [
@@ -68,17 +74,25 @@ const DEFS: SecDef[] = [
       { f: 'domain', label: 'Domain', help: 'Leave out http:// and www.', editHelp: true, type: 'text', req: true, ph: 'school.edu' },
       { f: 'subdomain', label: 'Subdomain', opt: true, help: 'Only the part before the domain. For sub.school.edu, enter sub.', type: 'text', ph: 'reorder' }] },
     { title: 'Images', rows: [{ f: 'logos', label: 'Logos', help: 'JPG or PNG only.', type: 'upload', req: true, uploadLabel: 'Upload logo' }] }] },
-  { key: 'store', icon: ShoppingBag, label: 'Student Store', desc: 'Paper ordering, pricing, cert type packaging and Lost & Damaged.', toggle: 'Shows paper credential ordering in the Student Store.', groups: [
+  { key: 'store', icon: ShoppingBag, paper: true, label: 'Paper credentials', desc: 'Paper ordering in the Student Store, pricing and cert type packaging.', toggle: 'Students can order paper credentials in the Student Store.', groups: [
     { title: 'Paper pricing', rows: [
       { f: 'first', label: 'First paper product price', type: 'money', req: true, ph: '0.00' },
       { f: 'additional', label: 'Additional paper product price', type: 'money', req: true, ph: '0.00' },
       { f: 'applies', label: 'Additional price applies', type: 'radio', req: true, options: [['certtype', 'Per cert type (Recommended)', 'The first item of each cert type gets the first price; more of that type get the additional price.'], ['cart', 'Per cart', 'Every item after the first in the cart gets the additional price.']] }] },
-    { title: 'Cert types', certs: true, rows: [] },
-    { title: 'Lost & Damaged', rows: [{ f: 'ld', label: 'Student reporting', type: 'check', checkLabel: 'Lets students report lost or damaged paper credentials in the Student Store.' }] }] },
+    { title: 'Cert types', certs: true, rows: [] }] },
 ];
 
+// ?section= deep links, same names as the design's (for user stories).
+const SECTION_LINKS: Record<string, SecKey> = {
+  paper: 'store', 'paper-credentials': 'store', store: 'store', 'student-store': 'store', 'lost-damaged': 'ld', ld: 'ld',
+  'display-name': 'display', display: 'display', 'paper-authentication': 'display', batching: 'batch', batch: 'batch',
+  ced: 'ced', digital: 'ced', 'digital-credentials': 'ced', reorder: 'reorder', reorders: 'reorder', hold: 'hold', holds: 'hold',
+};
+
 type Status = 'done' | 'off' | 'todo';
+const NO_PAPER = 'This organization is CeD/CeC only. Change it in Digital Credentials.';
 const statusOf = (k: SecKey, d: OrgSettings): Status => {
+  if ((k === 'store' || k === 'ld') && d.ced.cedOnly) return 'off';
   if (k === 'display') return d.display.name.trim() ? 'done' : 'todo';
   return d[k].on ? 'done' : 'off';
 };
@@ -175,7 +189,10 @@ function logEntries(org: Org, k: SecKey, prev: Vals, next: Vals): LogEntry[] {
       out.push(L('Cert types', 'Cert type description: ' + c.type, pc[i]?.desc ?? '', c.desc));
       out.push(L('Cert types', 'Cert type packaging: ' + c.type, pkgLabel(pc[i]?.pkg ?? null), pkgLabel(c.pkg)));
     });
-    out.push(L('Lost & Damaged', 'Lost & Damaged Reporting', onOff(prev.ld), onOff(next.ld)));
+  }
+  if (k === 'ld') {
+    out.push(L('Lost & Damaged', 'Lost & Damaged', onOff(prev.on), onOff(next.on)));
+    out.push(L('Lost & Damaged', 'Student reporting', onOff(prev.on && prev.report), onOff(next.on && next.report)));
   }
   return out.filter((e): e is LogEntry => !!e);
 }
@@ -185,7 +202,8 @@ export function SettingsTab({ org }: { org: Org }) {
   const toast = useToast();
   const [data, setDataState] = useState<OrgSettings>(() => saved.get(org.id) ?? seedSettings(org));
   const setData = (d: OrgSettings) => { saved.set(org.id, d); setDataState(d); };
-  const [sec, setSec] = useState<SecKey>('batch');
+  const [params] = useSearchParams();
+  const [sec, setSec] = useState<SecKey>(() => SECTION_LINKS[params.get('section') ?? ''] ?? 'batch');
   const [draft, setDraft] = useState<Vals | null>(null);
   const [tried, setTried] = useState(false);
   const inactive = org.status === 'inactive';
@@ -195,10 +213,11 @@ export function SettingsTab({ org }: { org: Org }) {
   DEFS.forEach((d) => counts[statuses[d.key]]++);
 
   const def = DEFS.find((d) => d.key === sec)!;
-  const cur = data[sec] as unknown as Vals;
+  const cur = { ...(data[sec] as unknown as Vals), _paperOn: data.store.on };
   const v: Vals = draft ?? cur;
   const editing = !!draft;
-  const isOn = sec === 'display' ? true : !!v.on;
+  const blocked = def.paper && data.ced.cedOnly ? NO_PAPER : '';
+  const isOn = sec === 'display' ? true : !!v.on && !blocked;
 
   const errs: Record<string, string> = {};
   const certErrs: Record<number, { desc?: string; pkg?: string }> = {};
@@ -226,6 +245,7 @@ export function SettingsTab({ org }: { org: Org }) {
     }
     if (bad) return;
     const next = { ...draft };
+    delete next._paperOn;
     if (typeof next.first === 'string' && next.first) next.first = Number(next.first).toFixed(2);
     if (typeof next.additional === 'string' && next.additional) next.additional = Number(next.additional).toFixed(2);
     if (typeof next.price === 'string' && next.price) next.price = Number(next.price).toFixed(2);
@@ -270,17 +290,12 @@ export function SettingsTab({ org }: { org: Org }) {
               <div style={{ minWidth: 0 }}>
                 <div className={st.titleRow}>
                   <h2 id="v2-title" className={s.h2}>{def.label}</h2>
-                  {editing && def.toggle ? (
-                    <span className="cc-switch-label">
-                      <button type="button" role="switch" className="cc-switch" aria-checked={isOn} aria-label={def.label} aria-describedby="v2-sw-help" onClick={() => set('on', !isOn)} />
-                      <span aria-hidden="true">{isOn ? 'On' : 'Off'}</span>
-                    </span>
-                  ) : (
+                  {/* Sections with an on/off switch show their status in the Status group below, not beside the title. */}
+                  {!def.toggle && sec !== 'display' && (
                     <span className={`cc-badge ${statuses[sec] === 'done' ? 'cc-badge--success' : statuses[sec] === 'todo' ? 'cc-badge--warning' : ''}`}>{statusLabel(sec, statuses[sec])}</span>
                   )}
                 </div>
                 <p className={s.sub}>{def.desc}</p>
-                {def.toggle && <p id="v2-sw-help" className="sr-only">{def.toggle}</p>}
               </div>
             </div>
             <div className={st.actions}>
@@ -289,11 +304,35 @@ export function SettingsTab({ org }: { org: Org }) {
                   <button type="button" className="cc-btn cc-btn--secondary" onClick={cancel}>Cancel</button>
                   <button type="button" className="cc-btn cc-btn--primary" onClick={save}>Save changes</button>
                 </>
-              ) : (
+              ) : blocked ? null : (
                 <button type="button" className="cc-btn cc-btn--primary" onClick={inactive ? undefined : startEdit} aria-disabled={inactive} title={inactive ? 'Reactivate this organization to edit it' : undefined}>Edit</button>
               )}
             </div>
           </div>
+
+          {def.toggle && (
+            <div className={st.group}>
+              <h3 className="cc-setting-group__title">Status</h3>
+              <div className="cc-setting-group">
+                <div className="cc-setting-row">
+                  <div className="cc-setting-row__text">
+                    <span id="v2-on-label" className="cc-setting-row__label">{def.label}</span>
+                    <p id="v2-on-help" className="cc-setting-row__help">{blocked || def.toggle}</p>
+                  </div>
+                  <div className="cc-setting-row__control">
+                    {editing && !blocked ? (
+                      <span className="cc-switch-label">
+                        <button type="button" role="switch" className="cc-switch" aria-checked={!!v.on} aria-labelledby="v2-on-label" aria-describedby="v2-on-help" onClick={() => set('on', !v.on)} />
+                        <span aria-hidden="true">{v.on ? 'On' : 'Off'}</span>
+                      </span>
+                    ) : (
+                      <span className={`cc-badge ${isOn ? 'cc-badge--success' : ''}`}>{isOn ? 'On' : 'Off'}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isOn && (
             def.groups.map((g) => {
@@ -322,7 +361,8 @@ export function SettingsTab({ org }: { org: Org }) {
 function SettingRow({ r, v, editing, err, set, sec }: { r: Row; v: Vals; editing: boolean; err?: string; set: (f: string, x: unknown) => void; sec: SecKey }) {
   const id = `set-${sec}-${r.f}`;
   const errId = id + '-err';
-  const showHelp = r.help && (!r.editHelp || editing);
+  const helpText = r.help || (r.type === 'check' ? r.checkLabel : '');
+  const showHelp = helpText && (!r.editHelp || editing);
   const helpId = showHelp ? id + '-help' : undefined;
   const describedBy = [helpId, err ? errId : ''].filter(Boolean).join(' ') || undefined;
   const x = v[r.f];
@@ -360,11 +400,12 @@ function SettingRow({ r, v, editing, err, set, sec }: { r: Row; v: Vals; editing
       </div>
     );
   } else if (r.type === 'check') {
+    // V6: yes/no settings are switches; what the switch does is the row's help text.
     control = (
-      <label className="cc-checkbox">
-        <input className="cc-checkbox__input" type="checkbox" checked={!!x} onChange={() => set(r.f, !x)} aria-describedby={describedBy} />
-        {r.checkLabel}
-      </label>
+      <span className="cc-switch-label">
+        <button type="button" role="switch" className="cc-switch" aria-checked={!!x} aria-labelledby={id + '-label'} aria-describedby={describedBy} onClick={() => set(r.f, !x)} />
+        <span aria-hidden="true">{x ? 'On' : 'Off'}</span>
+      </span>
     );
   } else if (r.type === 'select') {
     control = (
@@ -406,7 +447,7 @@ function SettingRow({ r, v, editing, err, set, sec }: { r: Row; v: Vals; editing
         <label id={id + '-label'} htmlFor={labelFor} className="cc-setting-row__label">
           {r.label}{editing && r.opt && <span className={st.optTag}> (optional)</span>}
         </label>
-        {showHelp && <p id={helpId} className="cc-setting-row__help">{r.help}</p>}
+        {showHelp && <p id={helpId} className="cc-setting-row__help">{helpText}</p>}
       </div>
       <div className="cc-setting-row__control">
         {control}
