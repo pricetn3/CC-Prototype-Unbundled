@@ -1,9 +1,9 @@
 /* Organization profile: header, tabs, and the Details tab (view and edit, setup status, settings summary,
-   deactivate / reactivate). The other tabs aren't built yet. */
+   deactivate / reactivate). The other tabs live in ./org-profile. */
 
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Check, ChevronRight, Clock, Copy, Construction, GraduationCap } from 'lucide-react';
+import { Check, ChevronRight, Clock, Copy, GraduationCap } from 'lucide-react';
 import { useStore } from '../data/store';
 import { avatarTone, initials, orgLogo, settingsSummary, type Org } from '../data/orgs';
 import { SegTabs } from '../components/SegTabs';
@@ -11,6 +11,11 @@ import { StatusIcon } from '../components/StatusIcon';
 import { Dialog } from '../components/Dialog';
 import { useToast } from '../components/Toast';
 import { NotBuilt } from './NotBuilt';
+import { ShippingTab } from './org-profile/ShippingTab';
+import { BillingTab } from './org-profile/BillingTab';
+import { ContactsTab } from './org-profile/ContactsTab';
+import { PunctuationTab } from './org-profile/PunctuationTab';
+import { SettingsTab } from './org-profile/SettingsTab';
 import styles from './OrgProfile.module.css';
 
 type TabKey = 'details' | 'shipping' | 'billing' | 'contacts' | 'punctuation' | 'settings';
@@ -66,18 +71,13 @@ export function OrgProfile() {
       </div>
 
       <div className={`cc-scr ${styles.body}`}>
-        {tab === 'details' ? <DetailsTab org={org} onTab={setTab} /> : <TabNotBuilt label={TABS.find((t) => t.key === tab)!.label} />}
+        {tab === 'details' && <DetailsTab org={org} onTab={setTab} />}
+        {tab === 'shipping' && <ShippingTab org={org} />}
+        {tab === 'billing' && <BillingTab org={org} />}
+        {tab === 'contacts' && <ContactsTab org={org} />}
+        {tab === 'punctuation' && <PunctuationTab />}
+        {tab === 'settings' && <SettingsTab org={org} />}
       </div>
-    </div>
-  );
-}
-
-function TabNotBuilt({ label }: { label: string }) {
-  return (
-    <div className={styles.notBuilt}>
-      <span className={styles.notBuiltIcon} aria-hidden="true"><Construction size={24} /></span>
-      <h2 className={styles.notBuiltTitle}>{label} isn’t built yet</h2>
-      <p className={styles.notBuiltText}>This tab is in the prototype but hasn’t been built in this app yet.</p>
     </div>
   );
 }
