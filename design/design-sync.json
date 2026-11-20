@@ -1,0 +1,51 @@
+{
+  "_about": "Where this app's design comes from and what was last synced. The sync-design skill (.claude/skills/sync-design) reads and updates this file. design/snapshot/ holds the canvas files exactly as they were at lastSync, so the next sync can diff against them.",
+  "canvas": {
+    "title": "CC Platform External prototype",
+    "url": "https://claude.ai/artifact/2f1Tr7A9ipNVy235C8QyWx",
+    "codeUrl": "https://claude.ai/code/artifact/0d67afea-c1d3-48b0-8658-ccb40519f091"
+  },
+  "designSystem": {
+    "repo": "~/Documents/GitHub/CC-Design-System",
+    "tokens": "https://pricetn3.github.io/CC-Design-System/tokens.css",
+    "components": "https://pricetn3.github.io/CC-Design-System/components.css",
+    "claudeDesign": "https://claude.ai/artifact/KLsdgKCsMehdiX4giBSJkZ"
+  },
+  "lastSync": {
+    "canvasVersion": "1795189931-0ac4",
+    "date": "2026-11-20",
+    "designSystemCommit": "c1ddf73"
+  },
+  "artboards": {
+    "Internal-CC-Platform.dc.html": {
+      "view": "internal",
+      "screens": {
+        "shell": { "markup": "SIDEBAR, MAIN > TOP BAR", "code": ["src/layout/Sidebar.tsx", "src/layout/TopBar.tsx", "src/layout/AppShell.tsx"], "status": "built" },
+        "home": { "markup": "isHome", "code": ["src/pages/Home.tsx"], "status": "built" },
+        "orgs": { "markup": "isOrgs", "code": ["src/pages/Organizations.tsx"], "status": "built" },
+        "org": { "markup": "isOrgProfile (Details tab: isDetails)", "code": ["src/pages/OrgProfile.tsx"], "status": "details tab built; Shipping, Billing, Contacts, Punctuation Data, Settings tabs not built" },
+        "admin": { "markup": "isAdmin (adminVM)", "code": ["src/pages/Admin.tsx", "src/pages/AdminCountries.tsx", "src/pages/AdminActionLog.tsx"], "status": "built" },
+        "data": { "markup": "seed(), implSeedLog(), implCountriesSeed(), setupSummary()", "code": ["src/data/orgs.ts", "src/data/actionLog.ts", "src/data/countries.json"], "status": "ported" },
+        "addorg": { "markup": "isAddOrg", "status": "not built" },
+        "users": { "markup": "isUsersScreen", "status": "not built" },
+        "profile": { "markup": "isProfile", "status": "not built" },
+        "reports": { "markup": "isReports", "status": "not built" },
+        "orders": { "markup": "isOrders, isNewOrder", "status": "not built" },
+        "credentials": { "markup": "isCredentialsScreen", "status": "not built" },
+        "reorders": { "markup": "isReorders", "status": "not built" },
+        "holds": { "markup": "isHolds", "status": "not built" },
+        "signatures": { "markup": "isSignatures", "status": "not built" },
+        "docs": { "markup": "isDocs", "status": "not built" }
+      }
+    },
+    "CCTable.dc.html": { "code": ["src/components/CCTable.tsx"], "status": "built" },
+    "SegTabs.dc.html": { "code": ["src/components/SegTabs.tsx"], "status": "built" },
+    "CCField.dc.html": { "code": [], "status": "inputs use the design system's cc-field / cc-input classes directly" }
+  },
+  "notTracked": {
+    "External-CC-Platform.dc.html": "Client view. Not built here yet; snapshot it when work on it starts.",
+    "OrgSettingsV3.dc.html": "Org profile › Settings tab. Not built here yet.",
+    "Landing.dc.html, Support.dc.html": "Marketing site. Not part of this app.",
+    "Internal-Org-Settings-Archive.dc.html": "Archived versions. Never synced."
+  }
+}

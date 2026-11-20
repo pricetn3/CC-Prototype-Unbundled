@@ -1,0 +1,29 @@
+.wrap { flex: 1 1 auto; min-height: 0; display: flex; padding: 0 var(--space-8) var(--space-8); }
+.card {
+  flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;
+  background: var(--bg-primary); border: 1px solid var(--gray-200); border-radius: var(--radius-xl); box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-5) var(--space-5) var(--space-4); }
+.toolbarTitle { display: flex; align-items: center; gap: var(--space-2_5); }
+.cardTitle { font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900); }
+.tools { display: flex; align-items: center; gap: var(--space-2_5); flex-wrap: wrap; }
+.filterCount {
+  min-width: 20px; height: 20px; padding: 0 var(--space-1_5);
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-full); background: var(--blue-600); color: var(--fg-on-brand);
+  font: var(--fw-semibold) var(--text-xs-size)/var(--text-xs-lh) var(--font-body);
+}
+/* The design opens the filter bar flush under the toolbar, with no top line. */
+.filterBar { border-top: 0; padding-top: 0; padding-bottom: var(--space-4); align-items: center; }
+.inactive { margin-left: var(--space-1_5); font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-700); cursor: pointer; }
+
+.row { cursor: pointer; }
+.idCell { padding-left: var(--space-5) !important; font-family: var(--font-mono) !important; color: var(--gray-500) !important; }
+.nameLink { font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-900); text-decoration: none; border-radius: var(--radius-xxs); }
+.nameLink:hover { text-decoration: underline; }
+.nameLink:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.settings { display: inline-flex; align-items: center; gap: var(--space-1_5); white-space: nowrap; font: var(--fw-medium) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); }
+.statusText { color: var(--gray-700); }
+
+@media (max-width: 1024px) { .wrap { padding-left: var(--space-6); padding-right: var(--space-6); } }

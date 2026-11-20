@@ -1,0 +1,60 @@
+.body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 0 var(--space-8) var(--space-8); }
+
+/* Section heading above each card */
+.sectionHead { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.sectionText { flex: 1 1 320px; min-width: 0; }
+.sectionTitle { font: var(--fw-semibold) var(--text-lg-size)/var(--text-lg-lh) var(--font-body); color: var(--gray-900); }
+.sectionDesc { margin-top: var(--space-0_5); font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--fg-secondary); max-width: 880px; }
+.sectionActions { display: flex; align-items: center; gap: var(--space-3); }
+
+.card {
+  display: flex; flex-direction: column; flex: 0 1 auto; min-height: 0;
+  background: var(--bg-primary); border: 1px solid var(--gray-200); border-radius: var(--radius-xl); box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-5) var(--space-5) var(--space-4); }
+.toolbarGroup { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.cardTitle { font: var(--fw-semibold) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--gray-900); }
+.found { font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); color: var(--gray-600); }
+.filterCount {
+  min-width: 20px; height: 20px; padding: 0 var(--space-1_5);
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-full); background: var(--blue-600); color: var(--fg-on-brand);
+  font: var(--fw-semibold) var(--text-xs-size)/var(--text-xs-lh) var(--font-body);
+}
+
+/* Sortable header buttons */
+.sortBtn {
+  display: inline-flex; align-items: center; gap: var(--space-1); width: 100%;
+  padding: var(--space-2_5) var(--space-3); border: none; background: transparent; cursor: pointer; text-align: left; white-space: nowrap;
+  font: var(--fw-medium) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600);
+}
+.sortBtn:hover { color: var(--gray-900); }
+.sortTh { padding: 0 !important; }
+
+/* Countries rows */
+.countryRow { height: 48px !important; }
+.countryRow[data-off="true"] > td { background: var(--gray-50); }
+.countryRow[data-off="true"]:hover > td { background: var(--gray-100) !important; }
+.countryName { font-weight: var(--fw-medium) !important; }
+
+/* Action log */
+.logRow { height: 48px !important; }
+.logRow > td { white-space: nowrap; padding-top: 0 !important; padding-bottom: 0 !important; }
+.pin1 { position: sticky; left: 0; z-index: 1; background: var(--bg-primary); }
+thead .pin1 { z-index: 3; background: var(--gray-50); }
+.orgNum { color: var(--gray-500); margin-right: var(--space-2); }
+.mono { font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-mono); }
+.viewText { display: inline-flex; align-items: center; gap: var(--space-1_5); white-space: nowrap; }
+.valueBox { margin-top: var(--space-1_5); padding: var(--space-3) var(--space-3_5); border-radius: var(--radius-md); font: var(--fw-regular) var(--text-sm-size)/var(--text-sm-lh) var(--font-body); white-space: pre-wrap; }
+
+/* Date range menu */
+.dateMenu { width: 200px; right: 0; left: auto; }
+.custom { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-2) var(--space-2_5) var(--space-3); border-top: 1px solid var(--gray-200); }
+
+/* Unsaved changes dialog */
+.leave { display: flex; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); }
+.leaveIcon { width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-full); background: var(--warning-50); color: var(--warning-700); }
+.leaveText { font: var(--fw-regular) var(--text-md-size)/var(--text-md-lh) var(--font-body); color: var(--fg-secondary); }
+
+@media (max-width: 1024px) { .body { padding-left: var(--space-6); padding-right: var(--space-6); } }

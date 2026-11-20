@@ -1,0 +1,217 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "AnnRow.dc.html": {
+      "h": 96,
+      "is_interactive": true,
+      "page": "components",
+      "title": "AnnRow",
+      "w": 820,
+      "x": 980,
+      "y": 0
+    },
+    "CCTable.dc.html": {
+      "h": 420,
+      "is_interactive": true,
+      "page": "components",
+      "title": "CCTable",
+      "w": 900,
+      "x": 0,
+      "y": 0
+    },
+    "DateTimePicker.dc.html": {
+      "h": 420,
+      "is_interactive": true,
+      "page": "components",
+      "title": "DateTimePicker",
+      "w": 328,
+      "x": 1880,
+      "y": 0
+    },
+    "OrgSettingsV3.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "platform",
+      "title": "Org settings v3 (Linear-style)",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "External-CC-Platform.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "platform",
+      "title": "External CC Platform",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Internal-CC-Platform.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "platform",
+      "title": "Internal CC Platform",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Landing.dc.html": {
+      "expand": "fill",
+      "h": 3000,
+      "is_interactive": true,
+      "page": "marketing",
+      "title": "Landing page",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "SegTabs.dc.html": {
+      "h": 60,
+      "is_interactive": true,
+      "page": "components",
+      "title": "SegTabs",
+      "w": 420,
+      "x": 2288,
+      "y": 0
+    },
+    "Support.dc.html": {
+      "expand": "fill",
+      "h": 2400,
+      "is_interactive": true,
+      "page": "marketing",
+      "title": "Support page",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "TimeField.dc.html": {
+      "h": 80,
+      "is_interactive": true,
+      "page": "components",
+      "title": "TimeField",
+      "w": 200,
+      "x": 2788,
+      "y": 0
+    },
+    "ViewRail.dc.html": {
+      "h": 300,
+      "is_interactive": true,
+      "page": "components",
+      "title": "ViewRail",
+      "w": 240,
+      "x": 3068,
+      "y": 0
+    },
+    "Internal-Org-Settings-Archive.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "archive",
+      "title": "Org settings archive: Versions 1–5, 7, 8 (pick one in the Prototype panel)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "CCField.dc.html": {
+      "x": 3388,
+      "y": 0,
+      "w": 360,
+      "h": 100,
+      "title": "CCField",
+      "is_interactive": true,
+      "page": "components"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-16T14:32:44Z",
+    "v": 1
+  },
+  "designSystems": [
+    {
+      "artifact": "https://claude.ai/artifact/KLsdgKCsMehdiX4giBSJkZ",
+      "copiedAt": "2026-11-18T01:29:00Z",
+      "namespace": "credential-connections",
+      "title": "Credential Connections Design System",
+      "version": "1795011305-551d"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "components": {
+      "kind": "title1",
+      "maxW": 3748,
+      "page": "components",
+      "text": "Shared components",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "archive": {
+      "kind": "title1",
+      "maxW": 1440,
+      "page": "archive",
+      "text": "Org settings: older versions",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "marketing": {
+      "kind": "title1",
+      "maxW": 2960,
+      "page": "marketing",
+      "text": "Marketing site",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "views": {
+      "kind": "title1",
+      "maxW": 2960,
+      "page": "platform",
+      "text": "Platform views",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
+  },
+  "order": [
+    "Internal-CC-Platform.dc.html",
+    "External-CC-Platform.dc.html",
+    "OrgSettingsV3.dc.html",
+    "Landing.dc.html",
+    "Support.dc.html",
+    "CCTable.dc.html",
+    "AnnRow.dc.html",
+    "DateTimePicker.dc.html",
+    "SegTabs.dc.html",
+    "TimeField.dc.html",
+    "ViewRail.dc.html",
+    "CCField.dc.html",
+    "Internal-Org-Settings-Archive.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "platform",
+      "name": "Platform"
+    },
+    {
+      "id": "marketing",
+      "name": "Marketing"
+    },
+    {
+      "id": "components",
+      "name": "Components"
+    },
+    {
+      "id": "archive",
+      "name": "Archive"
+    }
+  ],
+  "title": "CC Platform External prototype"
+}
