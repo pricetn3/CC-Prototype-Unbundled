@@ -325,6 +325,8 @@ export function SettingsTab({ org }: { org: Org }) {
             </div>
           </div>
 
+          {/* Content keeps the design's 880px reading width; the heading and divider above stay full width. */}
+          <div className={st.content}>
           {def.toggle && (
             <div className={st.group}>
               <h3 className="cc-setting-group__title">Status</h3>
@@ -367,6 +369,7 @@ export function SettingsTab({ org }: { org: Org }) {
               );
             })
           )}
+          </div>
         </section>
       </div>
     </div>

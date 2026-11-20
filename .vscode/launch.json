@@ -1,14 +1,14 @@
 {
-  // Press F5: starts the preview, then opens the app in Chrome.
+  // Press F5 (or Run › Start Debugging): starts the app and opens it in your default browser.
+  // Stop it with the red square in the toolbar, or Shift+F5.
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Open the app in Chrome",
-      "type": "chrome",
+      "name": "Open the app",
+      "type": "node-terminal",
       "request": "launch",
-      "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "Start preview"
+      "command": "npm run dev -- --open",
+      "cwd": "${workspaceFolder}"
     }
   ]
 }

@@ -32,6 +32,8 @@
 .titleRow { display: flex; align-items: center; gap: var(--space-2_5); flex-wrap: wrap; }
 .actions { display: flex; gap: var(--space-3); flex-shrink: 0; }
 
+/* Same reading width as the design (OrgSettingsV3, Version 6: contentMax 880px). */
+.content { max-width: 880px; }
 .group { margin-top: var(--space-6); }
 .radioInline { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
 .radioStack { display: flex; flex-direction: column; gap: var(--space-3); }
