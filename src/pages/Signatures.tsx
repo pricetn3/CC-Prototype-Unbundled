@@ -159,8 +159,8 @@ export function Signatures() {
             subtitle="Submit new signatures and update school names. Select a row to view its notes, or use the actions menu to edit details or preview a signature."
             actions={
               <>
-                <button type="button" className="cc-btn cc-btn--secondary" onClick={() => openForm('school')}>Update school name</button>
-                <button type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('submit')}><Plus size={18} aria-hidden="true" />Submit signature</button>
+                <button data-permi="manageSignatures" type="button" className="cc-btn cc-btn--secondary" onClick={() => openForm('school')}>Update school name</button>
+                <button data-permi="manageSignatures" type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('submit')}><Plus size={18} aria-hidden="true" />Submit signature</button>
               </>
             }
           />
@@ -253,7 +253,7 @@ export function Signatures() {
                               {menuId === s.id && (
                                 <div className="cc-dropdown__menu cc-dropdown__menu--end" role="menu" style={{ width: 208 }}>
                                   <button type="button" role="menuitem" className="cc-dropdown__option" onClick={() => toggleNotes(s.id)}><Paperclip size={16} aria-hidden="true" className={styles.menuIcon} />{open ? 'Hide notes' : 'View notes'}</button>
-                                  <button type="button" role="menuitem" className="cc-dropdown__option" onClick={() => openForm('edit', s)}><Pencil size={16} aria-hidden="true" className={styles.menuIcon} />Edit details</button>
+                                  <button data-permi="manageSignatures" type="button" role="menuitem" className="cc-dropdown__option" onClick={() => openForm('edit', s)}><Pencil size={16} aria-hidden="true" className={styles.menuIcon} />Edit details</button>
                                   <button type="button" role="menuitem" className="cc-dropdown__option" onClick={() => previewSig(s)}><Eye size={16} aria-hidden="true" className={styles.menuIcon} />Preview signature</button>
                                 </div>
                               )}

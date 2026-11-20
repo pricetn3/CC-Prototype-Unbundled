@@ -282,17 +282,17 @@ export function Holds() {
                     <td className={s.nowrap}>{r.conferral}</td>
                     <td className={`${s.nowrap} ${hmView === 'expiring' ? s.soon : ''}`}>{r.ordered}</td>
                     <td onClick={(e) => e.stopPropagation()}>
-                      {tab === 'hold' && <button type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Release hold for ${r.name}`} onClick={() => ask('release', [r.id])}>Release hold</button>}
-                      {canRevert && <button type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Revert hold for ${r.name}`} onClick={() => ask('revert', [r.id])}><RotateCcw size={16} aria-hidden="true" />Revert hold</button>}
+                      {tab === 'hold' && <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Release hold for ${r.name}`} onClick={() => ask('release', [r.id])}>Release hold</button>}
+                      {canRevert && <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Revert hold for ${r.name}`} onClick={() => ask('revert', [r.id])}><RotateCcw size={16} aria-hidden="true" />Revert hold</button>}
                       {tab === 'released' && !canRevert && <span className={s.batched} title="Already batched into an order, so it can't be reverted"><Package size={16} aria-hidden="true" />Batched</span>}
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <PopMenu label="Record actions" open={rowMenu === r.id} setOpen={(o) => setRowMenu(o ? r.id : null)}
                         trigger={(t) => <button {...t} type="button" className="cc-icon-btn" aria-label={`More actions for ${r.name}`} title="More actions"><MoreVertical size={20} aria-hidden="true" /></button>}>
-                        <MenuItem icon={<Pencil />} onClick={() => { openRow(r.id); startEdit(r, 'credential'); }}>Edit</MenuItem>
+                        <MenuItem perm="manageHolds" icon={<Pencil />} onClick={() => { openRow(r.id); startEdit(r, 'credential'); }}>Edit</MenuItem>
                         <MenuItem icon={<History />} onClick={() => openRow(r.id, 'activity')}>Activity</MenuItem>
                         <MenuItem icon={<Upload />} onClick={() => toast('Export started', `Records for ${r.name} will download as a CSV file.`)}>Export</MenuItem>
-                        {tab === 'hold' && <><MenuSep /><MenuItem danger icon={<Trash2 />} onClick={() => ask('delete', [r.id])}>Delete</MenuItem></>}
+                        {tab === 'hold' && <><MenuSep perm="manageHolds" /><MenuItem perm="manageHolds" danger icon={<Trash2 />} onClick={() => ask('delete', [r.id])}>Delete</MenuItem></>}
                       </PopMenu>
                     </td>
                   </tr>
@@ -304,11 +304,11 @@ export function Holds() {
         {selIds.length > 0 && (
           <BulkBar text={`${selRecs} ${selRecs === 1 ? 'record' : 'records'} selected`} onDeselect={() => setSel({})}>
             {tab === 'hold' && <>
-              <button type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" onClick={() => ask('delete', selIds)}>Delete</button>
-              <button type="button" className="cc-btn cc-btn--primary cc-btn--sm" onClick={() => ask('release', selIds)}>Release hold</button>
+              <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" onClick={() => ask('delete', selIds)}>Delete</button>
+              <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--primary cc-btn--sm" onClick={() => ask('release', selIds)}>Release hold</button>
             </>}
             {tab === 'released' && (
-              <button type="button" className="cc-btn cc-btn--primary cc-btn--sm" aria-disabled={!canBulkRevert}
+              <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--primary cc-btn--sm" aria-disabled={!canBulkRevert}
                 title={canBulkRevert ? undefined : batchedSel ? `${batchedSel}${batchedSel === 1 ? ' selected record has' : ' selected records have'} already been batched` : 'Batched records can’t be reverted'}
                 onClick={() => canBulkRevert && ask('revert', revertableSel.map((r) => r.id))}><RotateCcw size={16} aria-hidden="true" />Revert holds</button>
             )}
@@ -350,8 +350,8 @@ export function Holds() {
             <button type="button" className="cc-icon-btn" aria-label="Next record" aria-disabled={idx < 0 || idx >= n - 1} onClick={() => idx > -1 && idx < n - 1 && setOpenId(visible[idx + 1].id)}><ChevronRight size={20} aria-hidden="true" /></button>
             <span role="status" className={s.pos}>{idx > -1 ? `${idx + 1} of ${n}` : ''}</span>
             <div className={s.footEnd}>
-              {tab === 'hold' && <button type="button" className="cc-btn cc-btn--primary" onClick={() => ask('release', [r.id])}>Release hold</button>}
-              {canRevert && <button type="button" className="cc-btn cc-btn--secondary" onClick={() => ask('revert', [r.id])}><RotateCcw size={16} aria-hidden="true" />Revert hold</button>}
+              {tab === 'hold' && <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--primary" onClick={() => ask('release', [r.id])}>Release hold</button>}
+              {canRevert && <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--secondary" onClick={() => ask('revert', [r.id])}><RotateCcw size={16} aria-hidden="true" />Revert hold</button>}
             </div>
           </div>
         );
@@ -367,12 +367,12 @@ export function Holds() {
             </>}>
             {!ed && (
               <div className={s.panelHeadActions} style={{ marginBottom: 'var(--space-4)' }}>
-                {tab !== 'deleted' && <button type="button" className="cc-btn cc-btn--secondary cc-btn--sm" onClick={() => startEdit(r)}>Edit</button>}
+                {tab !== 'deleted' && <button data-permi="manageHolds" type="button" className="cc-btn cc-btn--secondary cc-btn--sm" onClick={() => startEdit(r)}>Edit</button>}
                 <PopMenu label="Record actions" open={pMenu} setOpen={setPMenu}
                   trigger={(t) => <button {...t} type="button" className="cc-icon-btn" aria-label="More record actions"><MoreVertical size={20} aria-hidden="true" /></button>}>
                   <MenuItem icon={<History />} onClick={() => { setPView('activity'); setEdit(null); }}>Activity</MenuItem>
                   <MenuItem icon={<Upload />} onClick={() => toast('Export started', `Records for ${r.name} will download as a CSV file.`)}>Export</MenuItem>
-                  {tab === 'hold' && <><MenuSep /><MenuItem danger icon={<Trash2 />} onClick={() => ask('delete', [r.id])}>Delete</MenuItem></>}
+                  {tab === 'hold' && <><MenuSep perm="manageHolds" /><MenuItem perm="manageHolds" danger icon={<Trash2 />} onClick={() => ask('delete', [r.id])}>Delete</MenuItem></>}
                 </PopMenu>
               </div>
             )}
@@ -424,8 +424,8 @@ export function Holds() {
                           <p className={s.addrName}>{r.name}</p>
                           <p className={s.p}>{r.addr1}<br />{r.addr2}</p>
                           <div className={s.addrLinks}>
-                            <button type="button" className="cc-link-btn cc-link cc-link--muted" onClick={() => toast('Address archived', `${r.addr1} was archived.`)}>Archive</button>
-                            <button type="button" className="cc-link-btn cc-link" onClick={() => startEdit(r, 'student')}>Edit</button>
+                            <button data-permi="manageHolds" type="button" className="cc-link-btn cc-link cc-link--muted" onClick={() => toast('Address archived', `${r.addr1} was archived.`)}>Archive</button>
+                            <button data-permi="manageHolds" type="button" className="cc-link-btn cc-link" onClick={() => startEdit(r, 'student')}>Edit</button>
                           </div>
                         </div>
                       </div>

@@ -246,7 +246,7 @@ function DetailsTab({ org, onTab }: { org: Org; onTab: (t: TabKey) => void }) {
             </div>
           ))}
 
-          <div className={styles.kv} style={{ alignItems: 'center', borderBottom: 0 }}>
+          <div data-permi="manageOrgs" className={styles.kv} style={{ alignItems: 'center', borderBottom: 0 }}>
             <div className={styles.k}>{inactive ? 'Reactivate Organization' : 'Deactivate Organization'}</div>
             <div>
               {inactive

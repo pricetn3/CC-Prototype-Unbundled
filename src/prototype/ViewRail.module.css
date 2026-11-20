@@ -1,0 +1,88 @@
+/* PROTOTYPE ONLY. The white panel on the right edge, matching the design's ViewRail. */
+
+.rail {
+  position: fixed; right: var(--space-4); top: 50%; transform: translateY(-50%); z-index: 9000;
+  width: 168px; box-sizing: border-box;
+  padding: var(--space-4) var(--space-3_5) var(--space-3);
+  background: var(--bg-primary); border-radius: var(--radius-3xl); box-shadow: var(--shadow-xl);
+  font-family: var(--font-body);
+}
+.rail button:focus-visible, .tab:focus-visible, .editor button:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+
+.hide {
+  position: absolute; top: calc(var(--space-2) * -1); right: calc(var(--space-2) * -1);
+  width: 26px; height: 26px; padding: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--gray-200); border-radius: var(--radius-full);
+  background: var(--bg-primary); color: var(--gray-600); box-shadow: var(--shadow-xs);
+}
+.hide:hover { background: var(--gray-100); color: var(--gray-900); }
+
+.title, .label {
+  font: var(--fw-semibold) var(--text-xs-size)/var(--text-xs-lh) var(--font-body);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-700);
+}
+.title { text-align: center; }
+.label { margin-top: var(--space-3_5); }
+
+.seg {
+  margin-top: var(--space-1_5); display: flex; flex-direction: column; gap: var(--space-0_5);
+  padding: var(--space-0_5); background: var(--gray-100); border-radius: var(--radius-lg);
+}
+.opt {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-1);
+  min-height: 30px; padding: 0 var(--space-2); box-sizing: border-box;
+  border: none; border-radius: var(--radius-sm); background: transparent; text-align: left;
+  font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-700);
+}
+button.opt { cursor: pointer; }
+button.opt:hover { background: var(--bg-primary); color: var(--gray-900); }
+.optOn {
+  background: var(--bg-primary); box-shadow: var(--shadow-xs), 0 0 0 1px var(--border-primary);
+  font-weight: var(--fw-semibold); color: var(--gray-900);
+}
+.optOff { color: var(--gray-600); cursor: not-allowed; }
+.soon { font-size: var(--text-2xs-size); line-height: var(--text-2xs-lh); color: var(--gray-600); }
+
+.perm { margin-top: var(--space-1_5); padding: var(--space-2); border-radius: var(--radius-lg); background: var(--gray-100); }
+.permRole { font: var(--fw-semibold) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-900); }
+.permSum { font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600); }
+.edit { margin-top: var(--space-1_5); width: 100%; }
+
+.foot {
+  margin-top: var(--space-3_5); padding-top: var(--space-2_5); border-top: 1px solid var(--gray-200);
+  text-align: center; font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600);
+}
+
+/* Collapsed: a small tab on the right edge brings the panel back. */
+.tab {
+  position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9000;
+  width: 24px; height: 72px; padding: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--gray-200); border-right: none; border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  background: var(--bg-primary); color: var(--gray-600); box-shadow: var(--shadow-xs);
+}
+
+/* Permissions editor opens to the left of the panel. */
+.editor {
+  position: fixed; right: 196px; top: 50%; transform: translateY(-50%); z-index: 9001;
+  width: 400px; max-width: calc(100vw - 220px); max-height: 86vh;
+  display: flex; flex-direction: column; box-sizing: border-box;
+  background: var(--bg-primary); border-radius: var(--radius-2xl); box-shadow: var(--shadow-2xl);
+  font-family: var(--font-body);
+}
+.edHead { position: relative; padding: var(--space-4) var(--space-4) var(--space-3); border-bottom: 1px solid var(--gray-200); }
+.edTitle { font: var(--fw-semibold) var(--text-smed-size)/var(--text-smed-lh) var(--font-body); color: var(--gray-900); outline: none; padding-right: var(--space-8); }
+.edSub { margin-top: var(--space-0_5); font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-600); }
+.edClose { position: absolute; top: var(--space-3); right: var(--space-3); }
+.edBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--space-3_5) var(--space-4); }
+.edFoot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4); border-top: 1px solid var(--gray-200);
+}
+
+/* Narrow screens: the editor takes the width left of the panel's edge. */
+@media (max-width: 640px) {
+  .editor { right: var(--space-4); left: var(--space-4); width: auto; max-width: none; top: auto; bottom: var(--space-4); transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .rail, .tab, .editor { transition: none; } }

@@ -60,7 +60,7 @@ export function Organizations() {
       <PageHeader
         title="Organizations"
         subtitle="All organizations added to the platform."
-        actions={<button type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/organizations/new')}><Plus size={16} aria-hidden="true" />Add organization</button>}
+        actions={<button data-permi="manageOrgs" type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/organizations/new')}><Plus size={16} aria-hidden="true" />Add organization</button>}
       />
 
       <div className={`cc-scr ${styles.wrap}`}>

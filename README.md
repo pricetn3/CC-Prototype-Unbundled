@@ -47,7 +47,8 @@ Run the app with `npm run dev`, then add the path to `http://localhost:5173`.
 | Screen | Path in the app | Code |
 | --- | --- | --- |
 | App shell (top bar, layout) | all screens | [AppShell.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/AppShell.tsx), [TopBar.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/TopBar.tsx) |
-| Side rail (prototype only, to be removed) | all screens | [Sidebar.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/Sidebar.tsx) |
+| Side navigation | all screens | [Sidebar.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/layout/Sidebar.tsx) |
+| Prototype panel (right edge, dev only, never shipped) | all screens | [prototype/](https://github.com/pricetn3/CC-Prototype-Unbundled/tree/main/src/prototype) |
 | Home | `/` | [Home.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Home.tsx) |
 | Organizations | `/organizations` | [Organizations.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/Organizations.tsx) |
 | Add organization | `/organizations/new` | [AddOrganization.tsx](https://github.com/pricetn3/CC-Prototype-Unbundled/blob/main/src/pages/AddOrganization.tsx) |

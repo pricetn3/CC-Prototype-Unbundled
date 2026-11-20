@@ -104,7 +104,7 @@ export function Users() {
         subtitle="Manage your team members and their account settings."
         actions={(
           <>
-            <button type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/users?invite=1')}><Plus size={16} aria-hidden="true" />Invite user</button>
+            <button data-permi="inviteUsers" type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/users?invite=1')}><Plus size={16} aria-hidden="true" />Invite user</button>
             <UsersOrgPicker id="users-org" options={orgOpts} value={orgKey} onChange={pickOrg} width={280} menuWidth={320} alignEnd searchPlaceholder="Search organizations" label="Showing users for" />
           </>
         )}
@@ -187,7 +187,7 @@ export function Users() {
                 <div className={styles.emptyText}>Your search did not match any users. Please try again or add a new user.</div>
                 <div className={styles.emptyActions}>
                   <button type="button" className="cc-btn cc-btn--secondary" onClick={() => { setQ(''); setApplied(EMPTY); setDraft(null); }}>Clear search</button>
-                  <button type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/users?invite=1')}><Plus size={16} aria-hidden="true" />Invite user</button>
+                  <button data-permi="inviteUsers" type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/users?invite=1')}><Plus size={16} aria-hidden="true" />Invite user</button>
                 </div>
               </div>
             )}
@@ -253,7 +253,7 @@ function UserRow({ u, up, menuOpen, setMenu, onOpen, onEdit, onResend, onStatus 
       </td>
       <td className={styles.actionsCell}>
         <div className="cc-dropdown" ref={wrap} style={{ display: 'inline-block' }}>
-          <button ref={btn} type="button" className="cc-icon-btn cc-icon-btn--xs" aria-label={`Actions for ${u.name}`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenu(!menuOpen)}>
+          <button data-permi="adminUsers" ref={btn} type="button" className="cc-icon-btn cc-icon-btn--xs" aria-label={`Actions for ${u.name}`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenu(!menuOpen)}>
             <MoreVertical size={18} aria-hidden="true" />
           </button>
           {menuOpen && (

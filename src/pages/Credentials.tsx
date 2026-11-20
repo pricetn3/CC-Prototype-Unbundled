@@ -368,7 +368,7 @@ export function Credentials() {
                         {isDig && <td><ValidBadge invalid={r.invalid} /></td>}
                         {isDig && (
                           <td>
-                            <button type="button" className="cc-btn cc-btn--secondary cc-btn--xs" aria-disabled={r.invalid} aria-label={`Send authorization link to ${r.name}`}
+                            <button data-permi="adminCredActions" type="button" className="cc-btn cc-btn--secondary cc-btn--xs" aria-disabled={r.invalid} aria-label={`Send authorization link to ${r.name}`}
                               onClick={(e) => { e.stopPropagation(); if (!r.invalid) setSend({ id: r.id, email: r.email, tried: false }); }}>
                               <Send size={14} aria-hidden="true" />Send
                             </button>
@@ -395,8 +395,8 @@ export function Credentials() {
       {selOn && (
         <div className={styles.selBar} role="region" aria-label="Selected credentials">
           <button type="button" className="cc-link cc-link-btn" onClick={() => setSel(null)}>Cancel</button>
-          <button type="button" className="cc-btn cc-btn--destructive-secondary" aria-disabled={!selIds.length} onClick={() => selIds.length && setBulk({ kind: 'invalid', ids: selIds, ok: false, at: '' })}>Mark invalid</button>
-          <button type="button" className="cc-btn cc-btn--primary" aria-disabled={!selIds.length} onClick={() => selIds.length && setBulk({ kind: 'valid', ids: selIds, ok: false, at: '' })}>Mark valid</button>
+          <button data-permi="adminCredActions" type="button" className="cc-btn cc-btn--destructive-secondary" aria-disabled={!selIds.length} onClick={() => selIds.length && setBulk({ kind: 'invalid', ids: selIds, ok: false, at: '' })}>Mark invalid</button>
+          <button data-permi="adminCredActions" type="button" className="cc-btn cc-btn--primary" aria-disabled={!selIds.length} onClick={() => selIds.length && setBulk({ kind: 'valid', ids: selIds, ok: false, at: '' })}>Mark valid</button>
           <span className={styles.selText} role="status">{selIds.length} selected</span>
         </div>
       )}
@@ -545,7 +545,7 @@ function CredPanel({ r, panel, orgName, found, setTab, onClose, onFound, onViewO
       footer={
         <div className={styles.footer}>
           {hasCounter ? <button type="button" className="cc-btn cc-btn--secondary" onClick={onCounter}>{dig ? 'View paper credential' : 'View digital credential'}</button> : <span />}
-          <button type="button" className={`cc-btn ${dig && !inv ? 'cc-btn--destructive' : 'cc-btn--primary'}`} onClick={onPrimary}>
+          <button data-permi={dig ? 'adminCredActions' : undefined} type="button" className={`cc-btn ${dig && !inv ? 'cc-btn--destructive' : 'cc-btn--primary'}`} onClick={onPrimary}>
             {!dig && <ExternalLink size={16} aria-hidden="true" />}{dig ? (inv ? 'Mark valid' : 'Mark invalid') : 'Track order'}
           </button>
         </div>

@@ -1,7 +1,7 @@
 /* Org profile › Settings (the prototype's OrgSettingsV3, Version 6, embedded): a side rail of sections with
    their status, and one section at a time in view or edit mode. Saving appends Admin › Action log entries. */
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { CalendarClock, FileText, FileX2, Monitor, PauseCircle, RefreshCw, ShoppingBag } from 'lucide-react';
 import type { Org } from '../../data/orgs';
@@ -208,6 +208,21 @@ export function SettingsTab({ org }: { org: Org }) {
   const [tried, setTried] = useState(false);
   const inactive = org.status === 'inactive';
 
+  // Prototype hook: the dev-only prototype panel (src/prototype) sends sample settings with this event.
+  // Nothing sends it in production.
+  useEffect(() => {
+    const onSample = (e: Event) => {
+      const d = (e as CustomEvent<{ orgId: string; settings: OrgSettings }>).detail;
+      if (d?.orgId !== org.id) return;
+      saved.set(org.id, d.settings);
+      setDataState(d.settings);
+      setDraft(null);
+      setTried(false);
+    };
+    window.addEventListener('cc-proto-settings', onSample);
+    return () => window.removeEventListener('cc-proto-settings', onSample);
+  }, [org.id]);
+
   const statuses = Object.fromEntries(DEFS.map((d) => [d.key, statusOf(d.key, data)])) as Record<SecKey, Status>;
   const counts = { done: 0, off: 0, todo: 0 };
   DEFS.forEach((d) => counts[statuses[d.key]]++);
@@ -305,7 +320,7 @@ export function SettingsTab({ org }: { org: Org }) {
                   <button type="button" className="cc-btn cc-btn--primary" onClick={save}>Save changes</button>
                 </>
               ) : blocked ? null : (
-                <button type="button" className="cc-btn cc-btn--primary" onClick={inactive ? undefined : startEdit} aria-disabled={inactive} title={inactive ? 'Reactivate this organization to edit it' : undefined}>Edit</button>
+                <button data-permi="manageOrgSettings" type="button" className="cc-btn cc-btn--primary" onClick={inactive ? undefined : startEdit} aria-disabled={inactive} title={inactive ? 'Reactivate this organization to edit it' : undefined}>Edit</button>
               )}
             </div>
           </div>

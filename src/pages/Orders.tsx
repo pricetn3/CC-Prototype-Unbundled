@@ -91,7 +91,7 @@ export function Orders() {
       <PageHeader
         title="Orders"
         subtitle="View and manage all orders."
-        actions={<button type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/orders/new')}><Plus size={16} aria-hidden="true" />New order</button>}
+        actions={<button data-permi="manageOrders" type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/orders/new')}><Plus size={16} aria-hidden="true" />New order</button>}
       />
 
       <div className={`cc-scr ${styles.wrap}`}>
@@ -230,7 +230,7 @@ function OrderPanel({ order, onClose, onViewCredentials, onCancel, onTrack }: {
       onClose={onClose}
       footer={
         <div className={styles.footer}>
-          <button type="button" className="cc-btn cc-btn--destructive-secondary" onClick={onCancel}>Cancel order</button>
+          <button data-permi="manageOrders" type="button" className="cc-btn cc-btn--destructive-secondary" onClick={onCancel}>Cancel order</button>
           <button type="button" className="cc-btn cc-btn--primary" onClick={onTrack}><ExternalLink size={16} aria-hidden="true" />Track order</button>
         </div>
       }

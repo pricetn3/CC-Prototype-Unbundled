@@ -24,9 +24,9 @@ export function Home() {
     { icon: User, label: 'Users', value: totalUsers, sub: 'Across all organizations', badge: pendingUsers ? `${pendingUsers} pending` : undefined, to: '/users' },
   ];
 
-  const quickActions: { icon: LucideIcon; title: string; desc: string; to: string }[] = [
+  const quickActions: { icon: LucideIcon; title: string; desc: string; to: string; perm?: string }[] = [
     { icon: Search, title: 'Search credentials', desc: 'Find credentials from past orders', to: '/orders/credentials' },
-    { icon: BarChart3, title: 'View reports', desc: 'Access detailed insights and analytics', to: '/reports' },
+    { icon: BarChart3, title: 'View reports', desc: 'Access detailed insights and analytics', to: '/reports', perm: 'anyReports' },
     { icon: Clock, title: 'View student reorders', desc: 'Check reorders expiring within 60 days', to: '/orders/reorders' },
     { icon: Lock, title: 'Review holds', desc: 'Release or delete records on hold', to: '/orders/holds' },
   ];
@@ -40,9 +40,9 @@ export function Home() {
         subtitle={<span style={{ color: 'var(--gray-500)' }}>{todayText()}</span>}
         actions={
           <>
-            <button type="button" className="cc-btn cc-btn--secondary" onClick={() => navigate('/organizations/new')}>Add organization</button>
-            <button type="button" className="cc-btn cc-btn--secondary" onClick={() => navigate('/users/invite')}>Invite user</button>
-            <button type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/orders/new')}><Plus size={16} aria-hidden="true" />New order</button>
+            <button data-permi="manageOrgs" type="button" className="cc-btn cc-btn--secondary" onClick={() => navigate('/organizations/new')}>Add organization</button>
+            <button data-permi="inviteUsers" type="button" className="cc-btn cc-btn--secondary" onClick={() => navigate('/users/invite')}>Invite user</button>
+            <button data-permi="manageOrders" type="button" className="cc-btn cc-btn--primary" onClick={() => navigate('/orders/new')}><Plus size={16} aria-hidden="true" />New order</button>
           </>
         }
       />
@@ -93,7 +93,7 @@ export function Home() {
           <h2 id="home-quick" className={styles.cardTitle} style={{ marginBottom: 'var(--space-4)' }}>Quick actions</h2>
           <div className={styles.quick}>
             {quickActions.map((q) => (
-              <button key={q.title} type="button" className={styles.quickItem} onClick={() => navigate(q.to)}>
+              <button data-permi={q.perm} key={q.title} type="button" className={styles.quickItem} onClick={() => navigate(q.to)}>
                 <span className={styles.quickIcon} aria-hidden="true"><q.icon size={16} strokeWidth={1.5} /></span>
                 <div>
                   <div className={styles.quickTitle}>{q.title}</div>

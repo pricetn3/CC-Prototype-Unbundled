@@ -128,21 +128,3 @@
 .foot { display: flex; align-items: center; justify-content: center; padding: var(--space-4) var(--space-3) 0; }
 .footLogo { display: block; height: 26px; width: auto; opacity: 0.4; }
 .footLogoSlim { height: 24px; width: 24px; object-fit: cover; object-position: right center; opacity: 0.4; }
-
-/* Prototype-only note: the rail is removed in development. */
-.protoNote {
-  margin: 0 var(--space-4) var(--space-3);
-  padding: var(--space-2_5) var(--space-3);
-  display: flex; flex-direction: column; gap: var(--space-1);
-  border: 1px dashed var(--warning-500); border-radius: var(--radius-md);
-  background: var(--warning-50);
-  font: var(--fw-regular) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--gray-700);
-}
-.protoNote strong { font-weight: var(--fw-semibold); color: var(--warning-700); }
-.protoSlim {
-  margin: 0 auto var(--space-3);
-  padding: var(--space-0_5) var(--space-1);
-  border: 1px dashed var(--warning-500); border-radius: var(--radius-xs);
-  background: var(--warning-50);
-  font: var(--fw-semibold) var(--text-xs-size)/var(--text-xs-lh) var(--font-body); color: var(--warning-700);
-}

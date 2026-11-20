@@ -116,7 +116,7 @@ function PermTree({ perms, setPerms, pfx }: { perms: Perms; setPerms: (p: Perms)
   );
 }
 
-function AccessPicker({ role, setRole, perms, setPerms, pfx }: { role: string; setRole: (r: 'admin' | 'standard') => void; perms: Perms; setPerms: (p: Perms) => void; pfx: string }) {
+export function AccessPicker({ role, setRole, perms, setPerms, pfx }: { role: string; setRole: (r: 'admin' | 'standard') => void; perms: Perms; setPerms: (p: Perms) => void; pfx: string }) {
   return (
     <>
       <h3 className={s.h3}>Access</h3>

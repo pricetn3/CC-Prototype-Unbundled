@@ -174,7 +174,7 @@ export function Documents() {
               </div>
               <div className={styles.headActions}>
                 <DocsSigOrgPicker id="ds-org" orgs={DOC_ORGS} value={org} width={320} onChange={(n) => { setOrg(n); setSub('active'); setHist({}); }} />
-                <button type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('client', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>
+                <button data-permi="manageClientDocs" type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('client', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>
               </div>
             </div>
 
@@ -196,7 +196,7 @@ export function Documents() {
                 <span aria-hidden="true" className={styles.emptyIcon}><Search size={24} /></span>
                 <div className={styles.emptyTitle}>{sub === 'deleted' ? 'No deleted documents' : 'No documents found!'}</div>
                 <div className={styles.subtitleSm}>{sub === 'deleted' ? 'Documents you delete for this organization appear here.' : 'No client documents have been added for this organization.'}</div>
-                {sub === 'active' && <button type="button" className="cc-btn cc-btn--primary" style={{ marginTop: 'var(--space-5)' }} onClick={() => openForm('client', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>}
+                {sub === 'active' && <button data-permi="manageClientDocs" type="button" className="cc-btn cc-btn--primary" style={{ marginTop: 'var(--space-5)' }} onClick={() => openForm('client', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>}
               </div>
             )}
 
@@ -213,7 +213,7 @@ export function Documents() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className={styles.docTitleRow}>
                           <h3 className={styles.docTitle}>{d.type}<span aria-hidden="true" className={styles.sep} />{orgName(d.org)}</h3>
-                          {!isDel && <button type="button" className="cc-icon-btn cc-icon-btn--xs" aria-label={`Edit ${title}`} title="Edit" onClick={() => openForm('client', 'edit', d)}><Pencil size={16} aria-hidden="true" /></button>}
+                          {!isDel && <button data-permi="manageClientDocs" type="button" className="cc-icon-btn cc-icon-btn--xs" aria-label={`Edit ${title}`} title="Edit" onClick={() => openForm('client', 'edit', d)}><Pencil size={16} aria-hidden="true" /></button>}
                         </div>
                         <p className={styles.subtitleSm}>{d.desc || 'No description.'}</p>
                       </div>
@@ -221,7 +221,7 @@ export function Documents() {
                         <div className={styles.docActs}>
                           <button type="button" className="cc-icon-btn" aria-label={`Preview ${title}`} title="Preview" onClick={() => setPrev({ kind: 'client', id: d.id, page: 1, zoom: false })}><Eye size={18} aria-hidden="true" /></button>
                           <button type="button" className="cc-icon-btn" aria-label={`Download ${title}`} title="Download" onClick={() => download(d)}><Download size={18} aria-hidden="true" /></button>
-                          <button type="button" className="cc-icon-btn" aria-label={`Delete ${title}`} title="Delete" onClick={() => setDel({ kind: 'client', id: d.id })}><Trash2 size={18} aria-hidden="true" /></button>
+                          <button data-permi="manageClientDocs" type="button" className="cc-icon-btn" aria-label={`Delete ${title}`} title="Delete" onClick={() => setDel({ kind: 'client', id: d.id })}><Trash2 size={18} aria-hidden="true" /></button>
                         </div>
                       )}
                     </div>
@@ -266,7 +266,7 @@ export function Documents() {
               </div>
               <div className={styles.headActions}>
                 <button type="button" className="cc-btn cc-btn--secondary" onClick={() => setView('faq')}>View FAQ's</button>
-                <button type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('helpful', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>
+                <button data-permi="manageHelpfulDocs" type="button" className="cc-btn cc-btn--primary" onClick={() => openForm('helpful', 'add')}><Plus size={18} aria-hidden="true" />Add document</button>
               </div>
             </div>
             {DOC_SECTIONS.map(([key, name]) => {
@@ -286,8 +286,8 @@ export function Documents() {
                         </div>
                         <div className={styles.helpActs}>
                           <button type="button" className="cc-icon-btn cc-icon-btn--xs" title="Download" aria-label={`Download ${h.name}`} onClick={() => download(h)}><Download size={16} aria-hidden="true" /></button>
-                          <button type="button" className="cc-icon-btn cc-icon-btn--xs" title="Edit" aria-label={`Edit ${h.name}`} onClick={() => openForm('helpful', 'edit', h)}><Pencil size={16} aria-hidden="true" /></button>
-                          <button type="button" className="cc-icon-btn cc-icon-btn--xs" title="Delete" aria-label={`Delete ${h.name}`} onClick={() => setDel({ kind: 'helpful', id: h.id })}><Trash2 size={16} aria-hidden="true" /></button>
+                          <button data-permi="manageHelpfulDocs" type="button" className="cc-icon-btn cc-icon-btn--xs" title="Edit" aria-label={`Edit ${h.name}`} onClick={() => openForm('helpful', 'edit', h)}><Pencil size={16} aria-hidden="true" /></button>
+                          <button data-permi="manageHelpfulDocs" type="button" className="cc-icon-btn cc-icon-btn--xs" title="Delete" aria-label={`Delete ${h.name}`} onClick={() => setDel({ kind: 'helpful', id: h.id })}><Trash2 size={16} aria-hidden="true" /></button>
                         </div>
                       </div>
                     ))}

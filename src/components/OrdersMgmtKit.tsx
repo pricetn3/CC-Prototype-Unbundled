@@ -105,15 +105,15 @@ export function PopMenu({ trigger, label, children, open, setOpen }: {
   );
 }
 
-export function MenuItem({ icon, children, onClick, danger, disabled }: { icon?: ReactNode; children: ReactNode; onClick: () => void; danger?: boolean; disabled?: boolean }) {
+export function MenuItem({ icon, children, onClick, danger, disabled, perm }: { icon?: ReactNode; children: ReactNode; onClick: () => void; danger?: boolean; disabled?: boolean; /** Permission it needs (prototype panel hides it without). */ perm?: string }) {
   return (
-    <button type="button" role="menuitem" className={`${styles.menuItem} ${danger ? styles.menuDanger : ''}`} aria-disabled={disabled || undefined}
+    <button type="button" role="menuitem" data-permi={perm} className={`${styles.menuItem} ${danger ? styles.menuDanger : ''}`} aria-disabled={disabled || undefined}
       onClick={(e) => { if (disabled) { e.stopPropagation(); return; } onClick(); }}>
       {icon}{children}
     </button>
   );
 }
-export const MenuSep = () => <div role="separator" className={styles.sep} />;
+export const MenuSep = ({ perm }: { perm?: string }) => <div role="separator" className={styles.sep} data-permi={perm} />;
 
 /** Organization picker (first three organizations, like the design). */
 export function OrgPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {

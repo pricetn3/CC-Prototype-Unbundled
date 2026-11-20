@@ -1,0 +1,21 @@
+/* PROTOTYPE ONLY. Hides controls the pretend user isn't allowed to use.
+   Screens tag gated controls with data-permi="<right>"; access.ts lists missing rights on <html data-npi>.
+   This file only loads with the prototype panel, so in production nothing is hidden by it. */
+
+html[data-npi~="manageOrders"] [data-permi~="manageOrders"],
+html[data-npi~="manageOrgs"] [data-permi~="manageOrgs"],
+html[data-npi~="manageOrgSettings"] [data-permi~="manageOrgSettings"],
+html[data-npi~="addFirstUser"] [data-permi~="addFirstUser"],
+html[data-npi~="manageClientDocs"] [data-permi~="manageClientDocs"],
+html[data-npi~="manageHelpfulDocs"] [data-permi~="manageHelpfulDocs"],
+html[data-npi~="manageReorders"] [data-permi~="manageReorders"],
+html[data-npi~="manageHolds"] [data-permi~="manageHolds"],
+html[data-npi~="viewCredReports"] [data-permi~="viewCredReports"],
+html[data-npi~="viewReorderReports"] [data-permi~="viewReorderReports"],
+html[data-npi~="manageSignatures"] [data-permi~="manageSignatures"],
+html[data-npi~="adminUsers"] [data-permi~="adminUsers"],
+html[data-npi~="adminCredActions"] [data-permi~="adminCredActions"],
+html[data-npi~="inviteUsers"] [data-permi~="inviteUsers"],
+html[data-npi~="anyReports"] [data-permi~="anyReports"] {
+  display: none !important;
+}

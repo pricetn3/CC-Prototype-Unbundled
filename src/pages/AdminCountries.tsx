@@ -87,7 +87,7 @@ export const AdminCountries = forwardRef<CountriesHandle>(function AdminCountrie
               <button type="button" className="cc-btn cc-btn--primary" aria-disabled={!changed.length} onClick={save}>Save changes</button>
             </>
           ) : (
-            <button type="button" className="cc-btn cc-btn--primary" onClick={() => setDraft(saved.map((c) => ({ ...c })))}>Edit</button>
+            <button data-permi="manageOrgSettings" type="button" className="cc-btn cc-btn--primary" onClick={() => setDraft(saved.map((c) => ({ ...c })))}>Edit</button>
           )}
         </div>
       </div>

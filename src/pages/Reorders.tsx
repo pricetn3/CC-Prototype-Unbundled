@@ -261,8 +261,8 @@ export function Reorders() {
                     {isPending && (
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className={s.acts}>
-                          <button type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Approve reorder for ${r.name}`} onClick={() => ask([r.id], 'approve')}>Approve</button>
-                          <button type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" aria-label={`Deny reorder for ${r.name}`} onClick={() => ask([r.id], 'deny')}>Deny</button>
+                          <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--secondary cc-btn--sm" aria-label={`Approve reorder for ${r.name}`} onClick={() => ask([r.id], 'approve')}>Approve</button>
+                          <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" aria-label={`Deny reorder for ${r.name}`} onClick={() => ask([r.id], 'deny')}>Deny</button>
                         </div>
                       </td>
                     )}
@@ -275,8 +275,8 @@ export function Reorders() {
         {selIds.length > 0 && (
           <BulkBar text={`${selIds.length} selected`} onDeselect={() => setSel({})}>
             {isPending && <>
-              <button type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" onClick={() => ask(selIds, 'deny')}>Deny</button>
-              <button type="button" className="cc-btn cc-btn--primary cc-btn--sm" onClick={() => ask(selIds, 'approve')}>Approve</button>
+              <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--destructive-secondary cc-btn--sm" onClick={() => ask(selIds, 'deny')}>Deny</button>
+              <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--primary cc-btn--sm" onClick={() => ask(selIds, 'approve')}>Approve</button>
             </>}
           </BulkBar>
         )}
@@ -407,8 +407,8 @@ function ReorderPanel(p: PanelProps) {
       <span role="status" className={s.pos}>{idx > -1 ? `${idx + 1} of ${n}` : ''}</span>
       {status === 'pending' && (
         <div className={s.footEnd}>
-          <button type="button" className="cc-btn cc-btn--destructive-secondary" onClick={() => p.onAsk('deny')}>Deny</button>
-          <button type="button" className="cc-btn cc-btn--primary" onClick={() => p.onAsk('approve')}>Approve</button>
+          <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--destructive-secondary" onClick={() => p.onAsk('deny')}>Deny</button>
+          <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--primary" onClick={() => p.onAsk('approve')}>Approve</button>
         </div>
       )}
     </div>
@@ -418,7 +418,7 @@ function ReorderPanel(p: PanelProps) {
     <Drawer title={edit ? 'Edit Reorder Details' : 'Reorder Details'} subtitle={`${r.name} - ${r.indId}`} onClose={p.onClose} footer={footer}>
       {!edit && (
         <div className={s.panelHeadActions} style={{ marginBottom: 'var(--space-4)' }}>
-          {!isAct && (status === 'pending' || status === 'approved') && <button type="button" className="cc-btn cc-btn--secondary cc-btn--sm" onClick={() => p.onEdit()}>Edit</button>}
+          {!isAct && (status === 'pending' || status === 'approved') && <button data-permi="manageReorders" type="button" className="cc-btn cc-btn--secondary cc-btn--sm" onClick={() => p.onEdit()}>Edit</button>}
           <PopMenu label="Reorder actions" open={p.pMenu} setOpen={p.setPMenu}
             trigger={(t) => <button {...t} type="button" className="cc-icon-btn" aria-label="More reorder actions"><MoreVertical size={20} aria-hidden="true" /></button>}>
             <MenuItem icon={<History />} onClick={() => p.setPView('activity')}>Activity</MenuItem>
@@ -482,8 +482,8 @@ function ReorderPanel(p: PanelProps) {
                     <p className={s.addrName}>{r.name}</p>
                     <p className={s.p}>{r.addr1}<br />{r.addr2}</p>
                     <div className={s.addrLinks}>
-                      <button type="button" className="cc-link-btn cc-link cc-link--muted" onClick={p.onArchive}>Archive</button>
-                      <button type="button" className="cc-link-btn cc-link" onClick={() => p.onEdit('student')}>Edit</button>
+                      <button data-permi="manageReorders" type="button" className="cc-link-btn cc-link cc-link--muted" onClick={p.onArchive}>Archive</button>
+                      <button data-permi="manageReorders" type="button" className="cc-link-btn cc-link" onClick={() => p.onEdit('student')}>Edit</button>
                     </div>
                   </div>
                 </div>
