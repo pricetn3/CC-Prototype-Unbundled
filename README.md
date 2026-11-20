@@ -30,3 +30,10 @@ Data is in memory (`src/data/`) and resets on reload. Org IDs, names and the act
 - `src/pages/`: one file per screen, each with a CSS Module for layout. Colors, type and spacing come from the design system tokens, and controls use its `cc-*` classes.
 
 Everything aims at WCAG 2.2 AA, the design system's standard.
+
+## Keeping it in sync with the design
+
+- **Design system:** token values and `cc-*` component styles update here on their own after you push the design system repo. Renamed tokens or classes need a sync.
+- **Claude Design canvas:** after changing the prototype, open Claude Code in this repo and say **"sync from design"**. The `sync-design` skill (`.claude/skills/sync-design/`) compares the canvas with `design/snapshot/`, ports what changed, checks it in the browser and commits it to a branch.
+
+`design/design-sync.json` records which canvas version was last synced and which screens are built.

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CC text field</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/credential-connections-design-system-081ce699-1423-4ee3-8e65-465674c518bc/colors_and_type.css">
+<!-- CC design system (the installed copy of the Credential Connections Design System, shared by every CC project) -->
+<link rel="stylesheet" href="ds/credential-connections/tokens.css" data-cc-ds="tokens">
+<link rel="stylesheet" href="ds/credential-connections/components/bundle.css" data-cc-ds="components">
+<style>
+  body { margin: 0; }
+  /* Input border comes from the CC design system (.cc-input), same as every CC project. */
+  textarea.cc-input { height: auto; padding: var(--space-2_5) var(--space-3); resize: vertical; }
+</style>
+</helmet>
+<label class="cc-field" style="width: 100%;">
+  <span class="cc-label">{{ label }}<sc-if value="{{ hasHint }}" hint-placeholder-val="{{ false }}"> <span class="cc-hint">{{ hint }}</span></sc-if></span>
+  <sc-if value="{{ isArea }}" hint-placeholder-val="{{ false }}">
+    <textarea class="cc-input" value="{{ value }}" onInput="{{ onInput }}" onBlur="{{ onBlur }}" placeholder="{{ placeholder }}" rows="{{ rows }}" aria-required="{{ required }}" aria-invalid="{{ invalid }}"></textarea>
+  </sc-if>
+  <sc-if value="{{ isInput }}" hint-placeholder-val="{{ true }}">
+    <input class="cc-input" type="{{ type }}" value="{{ value }}" onInput="{{ onInput }}" onBlur="{{ onBlur }}" placeholder="{{ placeholder }}" autocomplete="{{ autocomplete }}" aria-required="{{ required }}" aria-invalid="{{ invalid }}" disabled="{{ disabled }}">
+  </sc-if>
+  <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+    <span class="cc-hint cc-hint--error">{{ error }}</span>
+  </sc-if>
+</label>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":100},"label":{"editor":"text","default":"Label"},"placeholder":{"editor":"text","default":"Placeholder"},"hint":{"editor":"text","default":""},"error":{"editor":"text","default":""},"type":{"editor":"enum","options":["text","email","tel","password"],"default":"text"},"multiline":{"editor":"boolean","default":false},"required":{"editor":"boolean","default":true},"disabled":{"editor":"boolean","default":false},"value":{"editor":null},"onInput":{"editor":null},"onBlur":{"editor":null},"autocomplete":{"editor":null},"rows":{"editor":null}}'>
+class Component extends DCLogic {
+  // The CC text field, built on the CC design system's .cc-field / .cc-label / .cc-input / .cc-hint classes.
+  constructor(props) { super(props); this.state = { local: '' }; }
+  renderVals() {
+    const p = this.props;
+    const err = p.error || '';
+    const controlled = typeof p.onInput === 'function';
+    return {
+      label: p.label ?? 'Label', placeholder: p.placeholder ?? '', hint: p.hint || '', hasHint: !!p.hint,
+      type: p.type || 'text', autocomplete: p.autocomplete || 'off', rows: p.rows || 5,
+      isArea: !!p.multiline, isInput: !p.multiline,
+      value: controlled ? (p.value ?? '') : this.state.local,
+      onInput: controlled ? p.onInput : (e) => this.setState({ local: e.target.value }),
+      onBlur: p.onBlur || (() => {}),
+      required: p.required === false ? 'false' : 'true',
+      disabled: !!p.disabled,
+      error: err, hasError: !!err, invalid: err ? 'true' : 'false',
+      errCls: err ? 'cc-field-err' : '',
+      bd: err ? 'var(--error-500)' : 'var(--gray-500)',
+    };
+  }
+}
+</script>
+</body>
+</html>

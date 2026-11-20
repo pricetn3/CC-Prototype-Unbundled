@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/credential-connections-design-system-081ce699-1423-4ee3-8e65-465674c518bc/colors_and_type.css">
+<link rel="stylesheet" href="ds/credential-connections/tokens.css">
+<link rel="stylesheet" href="ds/credential-connections/components/bundle.css">
+</helmet>
+<div class="cc-tabs {{ modCls }}" style="display:flex; width:{{ width }}; max-width:{{ maxWidth }}; margin:{{ margin }};">
+  <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+    <button type="button" class="cc-tabs__tab" aria-pressed="{{ t.pressedAttr }}" onClick="{{ t.onClick }}" style="flex:{{ t.flex }};">
+      {{ t.label }}
+      <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ true }}"><span class="cc-tabs__count {{ t.countMod }}">{{ t.countText }}</span></sc-if>
+    </button>
+  </sc-for>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 420, &quot;height&quot;: 60},
+  &quot;tabs&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;Array&lt;{label:string,countText?:string,hasCount?:boolean,onClick:Function,flex:string,divider:string,bg:string,fg:string,cbg:string,cfg:string,cbd:string}&gt;&quot;},
+  &quot;width&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;fit-content&quot;, &quot;tsType&quot;: &quot;string&quot;},
+  &quot;maxWidth&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;none&quot;, &quot;tsType&quot;: &quot;string&quot;},
+  &quot;margin&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;0&quot;, &quot;tsType&quot;: &quot;string&quot;},
+  &quot;inset&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}
+}">
+class Component extends DCLogic {
+  renderVals() {
+    // Design system segmented tabs (cc-tabs). Table tabs: default look (white selected tab). Page tabs: cc-tabs--brand (light blue selected tab).
+    return {
+      tabs: (this.props.tabs || []).map(t => { const on = t.pressed !== undefined ? !!t.pressed : (t.bg && t.bg !== 'transparent'); return Object.assign({}, t, { pressedAttr: String(!!on), countMod: /warning/.test(t.cbg || '') ? 'cc-tabs__count--warning' : '' }); }),
+      modCls: this.props.inset ? '' : 'cc-tabs--brand',
+      width: this.props.width || 'fit-content',
+      maxWidth: this.props.maxWidth || 'none',
+      margin: this.props.margin || '0',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
